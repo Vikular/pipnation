@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip Nation Academy - Admin Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border: 2px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #004085;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .secret-key {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">👑</div>
+            <h1>Admin Setup</h1>
+            <p class="subtitle">Create your Pip Nation Academy admin account</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('create')">Create New Admin</button>
+            <button class="tab" onclick="switchTab('upgrade')">Upgrade Existing</button>
+        </div>
+        
+        <!-- CREATE NEW ADMIN TAB -->
+        <div id="create-tab" class="tab-content active">
+            <div class="info-box">
+                <strong>ℹ️ First Time Setup</strong><br>
+                Use this to create your first admin account. This should only be done once.
+            </div>
+            
+            <div id="create-message"></div>
+            
+            <form id="create-form" onsubmit="createAdmin(event)">
+                <div class="form-group">
+                    <label for="create-email">Email Address *</label>
+                    <input type="email" id="create-email" required placeholder="admin@pipnation.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="create-password">Password *</label>
+                    <input type="password" id="create-password" required minlength="6" placeholder="At least 6 characters">
+                </div>
+                
+                <div class="form-group">
+                    <label for="create-name">First Name *</label>
+                    <input type="text" id="create-name" required placeholder="Your name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="create-country">Country</label>
+                    <input type="text" id="create-country" placeholder="US" value="US">
+                </div>
+                
+                <button type="submit" id="create-btn">Create Admin Account</button>
+            </form>
+        </div>
+        
+        <!-- UPGRADE EXISTING TAB -->
+        <div id="upgrade-tab" class="tab-content">
+            <div class="warning-box">
+                <strong>⚠️ Upgrade Existing User</strong><br>
+                Use this if you already have a regular account and want to upgrade it to admin.
+            </div>
+            
+            <div class="info-box">
+                <strong>Secret Key Required:</strong>
+                <div class="secret-key">pip-nation-admin-2024</div>
+                Keep this secure!
+            </div>
+            
+            <div id="upgrade-message"></div>
+            
+            <form id="upgrade-form" onsubmit="upgradeToAdmin(event)">
+                <div class="form-group">
+                    <label for="upgrade-email">Your Email Address *</label>
+                    <input type="email" id="upgrade-email" required placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="upgrade-secret">Secret Key *</label>
+                    <input type="text" id="upgrade-secret" required placeholder="pip-nation-admin-2024" value="pip-nation-admin-2024">
+                </div>
+                
+                <button type="submit" id="upgrade-btn">Upgrade to Admin</button>
+            </form>
+        </div>
+        
+        <div class="back-link">
+            <a href="/">← Back to Pip Nation Academy</a>
+        </div>
+    </div>
+    
+    <script>
+        // Get API URL from environment or use default
+        const API_URL = window.location.origin.includes('localhost') 
+            ? 'http://localhost:54321/functions/v1/make-server-0991178c'
+            : `${window.location.origin}/functions/v1/make-server-0991178c`;
+        
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            
+            // Clear messages
+            document.getElementById('create-message').innerHTML = '';
+            document.getElementById('upgrade-message').innerHTML = '';
+        }
+        
+        async function createAdmin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('create-email').value;
+            const password = document.getElementById('create-password').value;
+            const firstName = document.getElementById('create-name').value;
+            const country = document.getElementById('create-country').value || 'US';
+            
+            const btn = document.getElementById('create-btn');
+            const messageDiv = document.getElementById('create-message');
+            
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+            messageDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/bootstrap-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password, firstName, country })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.innerHTML = `
+                        <div class="message success">
+                            <strong>✅ Success!</strong><br>
+                            Admin account created for <strong>${data.email}</strong><br>
+                            User ID: ${data.userId}<br>
+                            <br>
+                            <strong>Next Steps:</strong><br>
+                            1. Go back to the main app<br>
+                            2. Click "Login"<br>
+                            3. Use your email and password<br>
+                            4. You'll be taken to the Admin Dashboard!
+                        </div>
+                    `;
+                    document.getElementById('create-form').reset();
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="message error">
+                            <strong>❌ Error:</strong> ${data.error || 'Failed to create admin account'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `
+                    <div class="message error">
+                        <strong>❌ Network Error:</strong> ${error.message}<br>
+                        Make sure your server is running.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Admin Account';
+            }
+        }
+        
+        async function upgradeToAdmin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('upgrade-email').value;
+            const secretKey = document.getElementById('upgrade-secret').value;
+            
+            const btn = document.getElementById('upgrade-btn');
+            const messageDiv = document.getElementById('upgrade-message');
+            
+            btn.disabled = true;
+            btn.textContent = 'Upgrading...';
+            messageDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/upgrade-to-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, secretKey })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.innerHTML = `
+                        <div class="message success">
+                            <strong>✅ Success!</strong><br>
+                            Account <strong>${data.email}</strong> upgraded to admin!<br>
+                            User ID: ${data.userId}<br>
+                            <br>
+                            <strong>Next Steps:</strong><br>
+                            1. Log out if you're logged in<br>
+                            2. Log back in<br>
+                            3. You'll now see the Admin Dashboard!
+                        </div>
+                    `;
+                    document.getElementById('upgrade-form').reset();
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="message error">
+                            <strong>❌ Error:</strong> ${data.error || 'Failed to upgrade account'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `
+                    <div class="message error">
+                        <strong>❌ Network Error:</strong> ${error.message}<br>
+                        Make sure your server is running.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Upgrade to Admin';
+            }
+        }
+    </script>
+</body>
+</html>

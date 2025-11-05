@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication System Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .status-item {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .status-item.success {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        .status-item.error {
+            border-color: #f56565;
+            background: #fff5f5;
+        }
+        .status-item.loading {
+            border-color: #ecc94b;
+            background: #fffff0;
+        }
+        .status-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        .status-desc {
+            font-size: 12px;
+            color: #718096;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #48bb78;
+            color: white;
+        }
+        .badge-error {
+            background: #f56565;
+            color: white;
+        }
+        .badge-loading {
+            background: #ecc94b;
+            color: #744210;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .alert {
+            background: #bee3f8;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .alert-error {
+            background: #fed7d7;
+            border-left-color: #f56565;
+        }
+        .alert-success {
+            background: #c6f6d5;
+            border-left-color: #48bb78;
+        }
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .loader {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Authentication System Test</h1>
+        <p class="subtitle">Testing your Forex Academy authentication backend</p>
+
+        <div id="status-container">
+            <!-- Status items will be inserted here -->
+        </div>
+
+        <button class="btn" onclick="runTest()">
+            <span id="btn-text">🧪 Run Full Test</span>
+        </button>
+
+        <div id="result-container"></div>
+    </div>
+
+    <script>
+        const SERVER_URL = 'https://mkblwhxlrdcoflliwnyr.supabase.co/functions/v1/make-server-0991178c';
+        
+        let testResults = {
+            serverReachable: null,
+            healthCheck: null,
+            signupWorks: null,
+            signinWorks: null
+        };
+
+        function updateStatus() {
+            const container = document.getElementById('status-container');
+            container.innerHTML = `
+                <div class="status-item ${getStatusClass(testResults.serverReachable)}">
+                    <div>
+                        <div class="status-label">
+                            <span class="icon">${getIcon(testResults.serverReachable)}</span>
+                            Server Reachable
+                        </div>
+                        <div class="status-desc">Edge function is deployed</div>
+                    </div>
+                    <span class="status-badge ${getBadgeClass(testResults.serverReachable)}">${getBadgeText(testResults.serverReachable)}</span>
+                </div>
+
+                <div class="status-item ${getStatusClass(testResults.healthCheck)}">
+                    <div>
+                        <div class="status-label">
+                            <span class="icon">${getIcon(testResults.healthCheck)}</span>
+                            Health Check
+                        </div>
+                        <div class="status-desc">Server responds correctly</div>
+                    </div>
+                    <span class="status-badge ${getBadgeClass(testResults.healthCheck)}">${getBadgeText(testResults.healthCheck)}</span>
+                </div>
+
+                <div class="status-item ${getStatusClass(testResults.signupWorks)}">
+                    <div>
+                        <div class="status-label">
+                            <span class="icon">${getIcon(testResults.signupWorks)}</span>
+                            Signup Endpoint
+                        </div>
+                        <div class="status-desc">Can create new users</div>
+                    </div>
+                    <span class="status-badge ${getBadgeClass(testResults.signupWorks)}">${getBadgeText(testResults.signupWorks)}</span>
+                </div>
+
+                <div class="status-item ${getStatusClass(testResults.signinWorks)}">
+                    <div>
+                        <div class="status-label">
+                            <span class="icon">${getIcon(testResults.signinWorks)}</span>
+                            Login Endpoint
+                        </div>
+                        <div class="status-desc">Can authenticate users</div>
+                    </div>
+                    <span class="status-badge ${getBadgeClass(testResults.signinWorks)}">${getBadgeText(testResults.signinWorks)}</span>
+                </div>
+            `;
+        }
+
+        function getStatusClass(status) {
+            if (status === null) return 'loading';
+            return status ? 'success' : 'error';
+        }
+
+        function getBadgeClass(status) {
+            if (status === null) return 'badge-loading';
+            return status ? 'badge-success' : 'badge-error';
+        }
+
+        function getBadgeText(status) {
+            if (status === null) return 'Testing...';
+            return status ? '✓ Working' : '✗ Failed';
+        }
+
+        function getIcon(status) {
+            if (status === null) return '⏳';
+            return status ? '✅' : '❌';
+        }
+
+        async function runTest() {
+            const btn = document.getElementById('btn-text');
+            const resultContainer = document.getElementById('result-container');
+            btn.innerHTML = '<div class="loader"></div> Testing...';
+            resultContainer.innerHTML = '';
+
+            // Reset
+            testResults = {
+                serverReachable: null,
+                healthCheck: null,
+                signupWorks: null,
+                signinWorks: null
+            };
+            updateStatus();
+
+            // Test 1: Server Reachable
+            try {
+                const response = await fetch(`${SERVER_URL}/health`);
+                testResults.serverReachable = response.ok;
+                testResults.healthCheck = response.ok;
+                updateStatus();
+            } catch (error) {
+                testResults.serverReachable = false;
+                testResults.healthCheck = false;
+                updateStatus();
+                
+                resultContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>❌ Server Not Reachable</strong><br>
+                        Error: ${error.message}<br><br>
+                        <strong>Fix:</strong> Deploy the Edge Function<br>
+                        <div class="code-block">supabase functions deploy make-server-0991178c --project-ref mkblwhxlrdcoflliwnyr</div>
+                    </div>
+                `;
+                btn.textContent = '🔄 Try Again';
+                return;
+            }
+
+            // Test 2: Signup
+            const testEmail = `test-${Date.now()}@example.com`;
+            const testPassword = 'Test123456!';
+            let userId = null;
+
+            try {
+                const response = await fetch(`${SERVER_URL}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: testEmail,
+                        password: testPassword,
+                        firstName: 'Test User',
+                        country: 'US'
+                    })
+                });
+                const data = await response.json();
+                testResults.signupWorks = response.ok && !!data.userId;
+                userId = data.userId;
+                updateStatus();
+            } catch (error) {
+                testResults.signupWorks = false;
+                updateStatus();
+            }
+
+            // Test 3: Signin
+            if (testResults.signupWorks && userId) {
+                try {
+                    const response = await fetch(`${SERVER_URL}/signin`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: testEmail,
+                            password: testPassword
+                        })
+                    });
+                    const data = await response.json();
+                    testResults.signinWorks = response.ok && !!data.accessToken;
+                    updateStatus();
+
+                    if (testResults.signinWorks) {
+                        resultContainer.innerHTML = `
+                            <div class="alert alert-success">
+                                <strong>🎉 All Tests Passed!</strong><br><br>
+                                Your authentication system is fully operational!<br><br>
+                                <strong>Test Account Created:</strong><br>
+                                Email: ${testEmail}<br>
+                                Password: ${testPassword}<br>
+                                User ID: ${userId}<br>
+                                Access Token: ${data.accessToken.substring(0, 30)}...<br><br>
+                                ✅ You can now signup and login in your app!
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    testResults.signinWorks = false;
+                    updateStatus();
+                }
+            }
+
+            // Show results
+            if (!testResults.signupWorks || !testResults.signinWorks) {
+                resultContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>⚠️ Some Tests Failed</strong><br><br>
+                        ${!testResults.signupWorks ? '❌ Signup not working<br>' : ''}
+                        ${!testResults.signinWorks ? '❌ Login not working<br>' : ''}
+                        <br>
+                        Check that environment variables are set in Supabase Dashboard:<br>
+                        • SUPABASE_URL<br>
+                        • SUPABASE_ANON_KEY<br>
+                        • SUPABASE_SERVICE_ROLE_KEY<br><br>
+                        See QUICK_FIX_GUIDE.md for detailed instructions.
+                    </div>
+                `;
+            }
+
+            btn.textContent = '🔄 Run Test Again';
+        }
+
+        // Run test on load
+        window.onload = () => {
+            updateStatus();
+        };
+    </script>
+</body>
+</html>

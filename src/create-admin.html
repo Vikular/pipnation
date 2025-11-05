@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin - Pip Nation Academy</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>👑 Create Admin Account</h1>
+        <p class="subtitle">Set up your Pip Nation Academy admin login</p>
+        
+        <div class="info">
+            <strong>📝 Instructions:</strong><br>
+            1. Fill in your admin details below<br>
+            2. Click "Create Admin"<br>
+            3. Go back to main app and login with these credentials<br>
+            4. You'll automatically see the Admin Dashboard!
+        </div>
+
+        <form id="adminForm">
+            <label>Email Address</label>
+            <input type="email" id="email" value="admin@pipnation.com" required>
+            
+            <label>Password (min 6 characters)</label>
+            <input type="password" id="password" value="Admin123!" required minlength="6">
+            
+            <label>First Name</label>
+            <input type="text" id="firstName" value="Admin" required>
+            
+            <label>Country</label>
+            <input type="text" id="country" value="US" required>
+            
+            <button type="submit" id="submitBtn">Create Admin Account</button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // Auto-detect API URL
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const projectId = 'YOUR_PROJECT_ID'; // Will try to auto-detect
+        
+        // Try to get from localStorage or use default
+        let apiUrl;
+        if (isLocal) {
+            apiUrl = 'http://127.0.0.1:54321/functions/v1/make-server-0991178c';
+        } else {
+            // Extract from current URL or use env
+            const urlMatch = window.location.hostname.match(/([a-z0-9]+)\.supabase\.co/);
+            const detectedProjectId = urlMatch ? urlMatch[1] : projectId;
+            apiUrl = `https://${detectedProjectId}.supabase.co/functions/v1/make-server-0991178c`;
+        }
+
+        console.log('Using API URL:', apiUrl);
+
+        document.getElementById('adminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const firstName = document.getElementById('firstName').value;
+            const country = document.getElementById('country').value;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            result.className = 'result';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${apiUrl}/bootstrap-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        firstName,
+                        country
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ Success!</strong><br><br>
+                        Admin account created successfully!<br><br>
+                        <strong>Your Login Credentials:</strong><br>
+                        Email: <strong>${email}</strong><br>
+                        Password: <strong>${password}</strong><br>
+                        User ID: ${data.userId}<br><br>
+                        <strong>Next Steps:</strong><br>
+                        1. Go back to the main app<br>
+                        2. Click the "Login" button<br>
+                        3. Enter your email and password<br>
+                        4. You'll see the Admin Dashboard automatically!<br><br>
+                        <a href="/" style="color: #667eea; text-decoration: none; font-weight: bold;">← Back to Pip Nation Academy</a>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <strong>❌ Error:</strong><br>
+                        ${data.error || 'Failed to create admin account'}<br><br>
+                        ${data.error?.includes('already') ? 
+                            'This email already exists. Try the "Upgrade Existing" option in admin-setup.html' : 
+                            'Please check your details and try again.'}
+                    `;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `
+                    <strong>❌ Network Error:</strong><br>
+                    ${error.message}<br><br>
+                    <strong>Troubleshooting:</strong><br>
+                    • Make sure your backend server is running<br>
+                    • Check the browser console for errors<br>
+                    • Verify your Supabase URL is correct<br><br>
+                    API URL being used: <code>${apiUrl}</code>
+                `;
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Admin Account';
+            }
+        });
+    </script>
+</body>
+</html>
