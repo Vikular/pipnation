@@ -1,11 +1,18 @@
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
 
-  import { defineConfig } from 'vite';
-  import react from '@vitejs/plugin-react-swc';
-  import path from 'path';
+// Vite config that derives `base` from VITE_BASE env var when set.
+// Usage:
+//  - Local root build: VITE_BASE=/ npm run build (or use npm script build:local)
+//  - Pages build: VITE_BASE=/pipnation/ npm run build (or use npm script build:pages)
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const base = env.VITE_BASE || '/';
 
-  export default defineConfig({
+  return {
     plugins: [react()],
-    base: '/pipnation/',
+    base,
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -62,4 +69,5 @@
       port: 3000,
       open: true,
     },
-  });
+  };
+});

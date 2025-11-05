@@ -49,12 +49,12 @@ jobs:
       - name: Install Dependencies
         run: npm ci
         
-      - name: Build
+      - name: Build (Pages base)
         env:
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          npm run build
+          npm run build:pages
           
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
