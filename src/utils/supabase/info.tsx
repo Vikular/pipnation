@@ -6,15 +6,16 @@
  environment variables in your host/CI (Vercel/Netlify/Supabase/etc.).
 */
 
-const FALLBACK_PROJECT_ID = "mkblwhxlrdcoflliwnyr";
-const FALLBACK_PUBLIC_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rYmx3aHhscmRjb2ZsbGl3bnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNzEyNDksImV4cCI6MjA3NTk0NzI0OX0.CaK3tqR_p_sUcnlPohGq1ppZJI1HgrwLbNvrEgyrTvY";
+// This file expects both values to be provided via Vite environment variables.
+// Do NOT commit secrets to source. Set these in your host/CI (Vercel/Netlify/GitHub Actions).
+// Example env names: VITE_SUPABASE_PROJECT_ID and VITE_SUPABASE_ANON_KEY
 
-// Read from Vite env vars (prefixed with VITE_). import.meta.env values are
-// replaced at build time. Use these in CI/hosting instead of committing keys.
-export const projectId = (
-	import.meta.env.VITE_SUPABASE_PROJECT_ID as string
-) || FALLBACK_PROJECT_ID;
+export const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
 
-export const publicAnonKey = (
-	import.meta.env.VITE_SUPABASE_ANON_KEY as string
-) || FALLBACK_PUBLIC_ANON_KEY;
+export const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+// Optional runtime sanity check (will log a clear error in the browser if missing)
+if (!projectId || !publicAnonKey) {
+	// eslint-disable-next-line no-console
+	console.error('Missing Supabase environment variables: VITE_SUPABASE_PROJECT_ID or VITE_SUPABASE_ANON_KEY');
+}
