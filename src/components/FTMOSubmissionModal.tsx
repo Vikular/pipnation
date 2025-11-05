@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { X, Upload, CheckCircle, Award, Target, TrendingUp, Shield, Sparkles } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import Upload from 'lucide-react/dist/esm/icons/upload';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import Award from 'lucide-react/dist/esm/icons/award';
+import Target from 'lucide-react/dist/esm/icons/target';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Shield from 'lucide-react/dist/esm/icons/shield';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
