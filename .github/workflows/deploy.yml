@@ -75,3 +75,29 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Simple smoke-test that runs after Pages deployment. It will poll the
+  # published Pages URL and fail the workflow if the site doesn't return
+  # a 2xx/3xx status within the retries. Uses a static Pages URL derived
+  # from the repository (owner/repo).
+  smoke_test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke test published site
+        run: |
+          set -e
+          URL="https://vikular.github.io/pipnation"
+          echo "Checking $URL"
+          attempts=12
+          for i in $(seq 1 $attempts); do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || true)
+            echo "Attempt $i: HTTP $status"
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "Site is up (HTTP $status)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Site did not respond with 2xx/3xx after $attempts attempts"
+          exit 1
