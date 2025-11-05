@@ -7,6 +7,37 @@ This repository is the frontend SPA for Pip Nation / Forex Mentorship Platform F
 The app is a Vite + React (SWC) single-page application that uses Supabase for
 authentication and Edge Functions for server-side flows.
 
+## Deployment Status
+
+[![Deploy Status](https://github.com/Vikular/pipnation/actions/workflows/deploy.yml/badge.svg)](https://github.com/Vikular/pipnation/actions/workflows/deploy.yml)
+
+The app is automatically deployed to GitHub Pages at: https://vikular.github.io/pipnation
+
+### Important: Set Up Deployment
+
+Before the app can build and deploy, you must add these secrets to GitHub:
+
+1. Open [Repository Settings → Secrets → Actions](https://github.com/Vikular/pipnation/settings/secrets/actions)
+2. Click "New repository secret" and add both:
+   - Name: `VITE_SUPABASE_PROJECT_ID`
+   - Name: `VITE_SUPABASE_ANON_KEY`
+
+### Troubleshooting Deployment
+
+1. Check deployment status:
+   - Open [Actions → Deploy to GitHub Pages](https://github.com/Vikular/pipnation/actions/workflows/deploy.yml)
+   - Look for the latest workflow run
+   - The workflow has three key jobs:
+     - typecheck: Runs TypeScript checks
+     - build: Builds the app with Vite
+     - smoke_test: Verifies the deployed site responds
+
+2. Common issues:
+   - Error "Required secret not found": Add the secrets listed above
+   - Build fails: Check the build job logs
+   - Site unreachable: Check [Pages settings](https://github.com/Vikular/pipnation/settings/pages)
+     and verify it uses "GitHub Actions" as the source
+
 Quick start
 
 1. Install dependencies:
