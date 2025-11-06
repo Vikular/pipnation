@@ -69,9 +69,9 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchUserProfile = async (userId: string, token: string) => {
+  const fetchUserProfile = async (userId: string, token: string, retryCount = 0) => {
     try {
-      console.log(`🔄 Fetching user profile for userId: ${userId}`);
+      console.log(`🔄 Fetching user profile for userId: ${userId} (attempt ${retryCount + 1})`);
       const response = await fetch(`${apiUrl}/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -98,8 +98,20 @@ export default function App() {
         console.error(`❌ Failed to fetch profile. Status: ${response.status}`);
         const errorText = await response.text();
         console.error(`❌ Error response:`, errorText);
-        // Token invalid, clear storage
-        handleLogout();
+        
+        // Only logout if it's an auth error (401/403), not if profile doesn't exist (404)
+        if (response.status === 401 || response.status === 403) {
+          console.log('🔒 Authentication error - logging out');
+          handleLogout();
+        } else if (response.status === 404 && retryCount < 2) {
+          // Profile might not be ready yet, retry after a short delay
+          console.log(`⏳ Profile not found, retrying in 1 second... (attempt ${retryCount + 1}/3)`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return fetchUserProfile(userId, token, retryCount + 1);
+        } else {
+          // For other errors, show error but keep user logged in
+          toast.error('Failed to load profile. Please refresh the page.');
+        }
       }
     } catch (error) {
       console.error('❌ Error fetching user profile:', error);
