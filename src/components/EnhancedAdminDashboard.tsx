@@ -1,11 +1,36 @@
 import { useState, useEffect } from 'react';
-import { 
-  Users, Activity, DollarSign, TrendingUp, Shield, Bell, 
-  Settings, BarChart3, MessageSquare, Lock, Unlock, Eye,
-  Download, Search, Filter, RefreshCw, Globe, Calendar,
-  ArrowUp, ArrowDown, CheckCircle, XCircle, AlertTriangle,
-  Upload, Database, LogOut, Crown, UserPlus, Award, BookOpen, Clock, Trash2
-} from 'lucide-react';
+import Users from 'lucide-react/dist/esm/icons/users';
+import Activity from 'lucide-react/dist/esm/icons/activity';
+import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Shield from 'lucide-react/dist/esm/icons/shield';
+import Bell from 'lucide-react/dist/esm/icons/bell';
+import Settings from 'lucide-react/dist/esm/icons/settings';
+import BarChart3 from 'lucide-react/dist/esm/icons/bar-chart-3';
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
+import Lock from 'lucide-react/dist/esm/icons/lock';
+import Unlock from 'lucide-react/dist/esm/icons/unlock';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import Download from 'lucide-react/dist/esm/icons/download';
+import Search from 'lucide-react/dist/esm/icons/search';
+import Filter from 'lucide-react/dist/esm/icons/filter';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import ArrowUp from 'lucide-react/dist/esm/icons/arrow-up';
+import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import XCircle from 'lucide-react/dist/esm/icons/x-circle';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import Upload from 'lucide-react/dist/esm/icons/upload';
+import Database from 'lucide-react/dist/esm/icons/database';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
+import Crown from 'lucide-react/dist/esm/icons/crown';
+import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
+import Award from 'lucide-react/dist/esm/icons/award';
+import BookOpen from 'lucide-react/dist/esm/icons/book-open';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -17,7 +42,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { projectId } from '../utils/supabase/info';
 import { AdminCourseUpload } from './AdminCourseUpload';
 import { PendingPaymentsTab } from './PendingPaymentsTab';

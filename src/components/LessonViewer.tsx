@@ -209,7 +209,7 @@ export function LessonViewer({ lesson, isOpen, onClose, onComplete }: LessonView
                           </div>
                           <RadioGroup
                             value={quizAnswers[q.id]}
-                            onValueChange={(value) =>
+                            onValueChange={(value: any) =>
                               setQuizAnswers({ ...quizAnswers, [q.id]: value })
                             }
                             className="space-y-3 ml-14"

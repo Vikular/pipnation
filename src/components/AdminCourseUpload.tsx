@@ -7,7 +7,7 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 
 interface CourseMaterial {
@@ -191,7 +191,7 @@ export function AdminCourseUpload({ accessToken, onBack }: AdminCourseUploadProp
               {/* Material Type */}
               <div className="space-y-2">
                 <Label htmlFor="type">Material Type *</Label>
-                <Select value={materialType} onValueChange={(v) => setMaterialType(v as 'video' | 'pdf')}>
+                <Select value={materialType} onValueChange={(v: any) => setMaterialType(v as 'video' | 'pdf')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

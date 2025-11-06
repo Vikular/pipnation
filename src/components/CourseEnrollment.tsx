@@ -8,7 +8,7 @@ import { PaymentModal } from './PaymentModal';
 import { PaymentReceiptUpload } from './PaymentReceiptUpload';
 import { NavigationHeader } from './NavigationHeader';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { projectId } from '../utils/supabase/info';
 
 interface CourseEnrollmentProps {

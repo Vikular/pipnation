@@ -16,7 +16,8 @@ import { AuthTester } from './components/AuthTester';
 import { projectId, publicAnonKey } from './utils/supabase/info';
 import { supabase } from './utils/supabase/client';
 import { Toaster } from './components/ui/sonner';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
+import { Button } from './components/ui/button';
 
 type View = 'landing' | 'dashboard' | 'admin' | 'courses' | 'beginners' | 'strategy' | 'community';
 
@@ -42,6 +43,9 @@ interface UserProfile {
 }
 
 export default function App() {
+  console.log('App is rendering...');
+  console.log('⚠️ DEMO MODE: Backend API calls will fail (Edge Function not deployed)');
+  
   const [currentView, setCurrentView] = useState<View>('landing');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup' | 'lead'>('lead');

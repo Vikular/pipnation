@@ -22,6 +22,7 @@ interface UserProfile {
   completedLessons: string[];
   quizScores: Record<string, any>;
   advancedUnlocked?: boolean;
+  enrolledCourses?: string[];
 }
 
 interface StudentDashboardProps {
@@ -30,7 +31,7 @@ interface StudentDashboardProps {
   onLessonClick: (lesson: any) => void;
   onSubmitFTMO: () => void;
   accessToken: string;
-  onViewChange?: (view: string) => void;
+  onViewChange?: (view: any) => void;
 }
 
 export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, accessToken, onViewChange }: StudentDashboardProps) {
@@ -168,7 +169,7 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
         </motion.div>
 
         {/* Upgrade Prompt for Free Trial / Non-Enrolled Users */}
-        {user.enrolledCourses.length === 0 && onViewChange && (
+  {(user.enrolledCourses?.length ?? 0) === 0 && onViewChange && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -229,25 +230,25 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   >
                     <BookOpen className="w-4 h-4 mr-2" />
-                    {user.enrolledCourses.length === 0 ? 'Enroll in Courses' : 'View Courses'}
+                    {(user.enrolledCourses?.length ?? 0) === 0 ? 'Enroll in Courses' : 'View Courses'}
                   </Button>
                   <Button
                     onClick={() => onViewChange('beginners')}
                     size="sm"
                     variant="outline"
-                    disabled={!user.enrolledCourses.includes('beginners')}
+                    disabled={!user.enrolledCourses?.includes('beginners')}
                   >
                     📚 Beginners Academy
-                    {!user.enrolledCourses.includes('beginners') && <Lock className="w-3 h-3 ml-1" />}
+                    {!user.enrolledCourses?.includes('beginners') && <Lock className="w-3 h-3 ml-1" />}
                   </Button>
                   <Button
                     onClick={() => onViewChange('strategy')}
                     size="sm"
                     variant="outline"
-                    disabled={!user.enrolledCourses.includes('strategy')}
+                    disabled={!user.enrolledCourses?.includes('strategy')}
                   >
                     🎯 Strategy Course
-                    {!user.enrolledCourses.includes('strategy') && <Lock className="w-3 h-3 ml-1" />}
+                    {!user.enrolledCourses?.includes('strategy') && <Lock className="w-3 h-3 ml-1" />}
                   </Button>
                   <Button
                     onClick={() => onViewChange('community')}

@@ -8,7 +8,7 @@ import { Separator } from './ui/separator';
 import { Alert, AlertDescription } from './ui/alert';
 import { NavigationHeader } from './NavigationHeader';
 import { SocialLinks } from './SocialLinks';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface CommunityPageProps {
   userRole: string;

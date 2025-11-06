@@ -1,0 +1,17 @@
+/* Debug styles */
+body {
+  margin: 0;
+  padding: 0;
+  background: white !important;
+  color: black !important;
+}
+
+#root {
+  min-height: 100vh;
+  background: white !important;
+}
+
+/* Diagnostic outline */
+#root > * {
+  outline: 1px solid rgba(0, 0, 255, 0.1);
+}

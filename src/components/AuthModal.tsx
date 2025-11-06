@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react';
-import { X, Mail, Lock, User, Globe, Sparkles, Shield, CheckCircle, Phone, TrendingUp, Target, BookOpen, Briefcase } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import Lock from 'lucide-react/dist/esm/icons/lock';
+import User from 'lucide-react/dist/esm/icons/user';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Shield from 'lucide-react/dist/esm/icons/shield';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import Phone from 'lucide-react/dist/esm/icons/phone';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Target from 'lucide-react/dist/esm/icons/target';
+import BookOpen from 'lucide-react/dist/esm/icons/book-open';
+import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';

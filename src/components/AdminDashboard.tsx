@@ -491,7 +491,7 @@ export function AdminDashboard({ accessToken, onLogout }: AdminDashboardProps) {
                             <div className="flex items-center gap-3 flex-shrink-0">
                               <Select
                                 value={user.role}
-                                onValueChange={(newRole) => handleRoleChange(user.userId, newRole)}
+                                onValueChange={(newRole: any) => handleRoleChange(user.userId, newRole)}
                               >
                                 <SelectTrigger className="w-[140px] sm:w-[160px] border-2 hover:border-blue-400">
                                   <SelectValue />
