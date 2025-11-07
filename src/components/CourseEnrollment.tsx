@@ -23,6 +23,14 @@ interface CourseEnrollmentProps {
 }
 
 export function CourseEnrollment({ enrolledCourses, onEnroll, onBack, userName, userRole, onLogout, userId, accessToken }: CourseEnrollmentProps) {
+  console.log('🎓 CourseEnrollment component rendering:', {
+    enrolledCourses,
+    userName,
+    userRole,
+    userId,
+    hasAccessToken: !!accessToken
+  });
+
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [showReceiptUpload, setShowReceiptUpload] = useState(false);

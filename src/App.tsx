@@ -566,18 +566,26 @@ export default function App() {
         </div>
       )}
 
-      {currentView === 'courses' && userProfile && (
-        <CourseEnrollment
-          enrolledCourses={userProfile.enrolledCourses}
-          onEnroll={handleCourseEnroll}
-          onBack={() => handleViewChange('dashboard')}
-          userName={userProfile.firstName}
-          userRole={userProfile.role}
-          onLogout={handleLogout}
-          userId={userProfile.userId}
-          accessToken={accessToken}
-        />
-      )}
+      {currentView === 'courses' && userProfile && (() => {
+        console.log('🎨 Rendering courses view:', {
+          currentView,
+          hasUserProfile: !!userProfile,
+          enrolledCourses: userProfile.enrolledCourses,
+          userId: userProfile.userId
+        });
+        return (
+          <CourseEnrollment
+            enrolledCourses={userProfile.enrolledCourses || []}
+            onEnroll={handleCourseEnroll}
+            onBack={() => handleViewChange('dashboard')}
+            userName={userProfile.firstName}
+            userRole={userProfile.role}
+            onLogout={handleLogout}
+            userId={userProfile.userId}
+            accessToken={accessToken}
+          />
+        );
+      })()}
 
       {currentView === 'beginners' && userProfile && (() => {
         const isEnrolled = userProfile.enrolledCourses?.includes('beginners') || false;
