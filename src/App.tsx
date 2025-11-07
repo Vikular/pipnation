@@ -319,7 +319,11 @@ export default function App() {
         setAccessToken(data.session.access_token);
         localStorage.setItem('accessToken', data.session.access_token);
         localStorage.setItem('userId', data.user.id);
+        
+        console.log('📞 About to fetch user profile...');
         await fetchUserProfile(data.user.id, data.session.access_token);
+        console.log('✅ Profile fetch completed (check logs above for details)');
+        
         setAuthModalOpen(false);
         toast.success('Welcome back!');
       }
@@ -527,14 +531,22 @@ export default function App() {
       )}
 
       {currentView === 'dashboard' && userProfile && (
-        <StudentDashboard
-          user={userProfile}
-          onLogout={handleLogout}
-          onLessonClick={handleLessonClick}
-          onSubmitFTMO={handleSubmitFTMO}
-          accessToken={accessToken}
-          onViewChange={handleViewChange}
-        />
+        <>
+          {console.log('🎨 Rendering StudentDashboard with:', {
+            hasUserProfile: !!userProfile,
+            userId: userProfile?.userId,
+            role: userProfile?.role,
+            hasProgress: !!userProfile?.progress
+          })}
+          <StudentDashboard
+            user={userProfile}
+            onLogout={handleLogout}
+            onLessonClick={handleLessonClick}
+            onSubmitFTMO={handleSubmitFTMO}
+            accessToken={accessToken}
+            onViewChange={handleViewChange}
+          />
+        </>
       )}
 
       {/* Loading state for dashboard without profile */}
