@@ -149,10 +149,97 @@ async function getProfile(urlParts: string[], req: Request) {
   return json(row.value);
 }
 
+async function bootstrapAdmin(req: Request) {
+  if (!serviceClient) return json({ error: 'Server misconfigured' }, 500);
+  let body: any; try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  const email = body.email?.trim().toLowerCase();
+  const { password, firstName, country } = body;
+  if (!email || !password || !firstName) return json({ error: 'email, password, firstName required' }, 400);
+  if (password.length < 6) return json({ error: 'Password >= 6 chars required' }, 400);
+
+  const { data, error } = await serviceClient.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { firstName, country: country || 'US' },
+  });
+  if (error) return json({ error: error.message }, 400);
+  const userId = data.user?.id; if (!userId) return json({ error: 'User creation failed' }, 500);
+
+  const profile = {
+    userId,
+    email,
+    firstName,
+    country: country || 'US',
+    role: 'admin',
+    badge: 'gold',
+    enrolledCourses: ['beginners', 'strategy'],
+    coursesCompleted: [],
+    completedLessons: [],
+    progress: {
+      foundation: { completed: 0, total: 0 },
+      advanced: { completed: 0, total: 0 },
+      beginners: { completed: 0, total: 0 },
+      strategy: { completed: 0, total: 0 },
+    },
+    quizScores: {},
+    paymentHistory: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  const { error: upsertError } = await serviceClient.from('kv_store_0991178c').upsert({ key: `user:${userId}`, value: profile });
+  if (upsertError) return json({ error: 'Profile store failed', details: upsertError.message }, 500);
+  return json({ userId, email, message: 'Admin account created successfully' }, 201);
+}
+
+async function upgradeToAdmin(req: Request) {
+  if (!serviceClient) return json({ error: 'Server misconfigured' }, 500);
+  let body: any; try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  const email = body.email?.trim().toLowerCase();
+  const { secretKey } = body;
+  
+  if (!email || !secretKey) return json({ error: 'email and secretKey required' }, 400);
+  if (secretKey !== 'pip-nation-admin-2024') return json({ error: 'Invalid secret key' }, 403);
+
+  // Find user by email
+  const { data: authData, error: authError } = await serviceClient.auth.admin.listUsers();
+  if (authError) return json({ error: 'Failed to list users' }, 500);
+  
+  const user = authData.users.find(u => u.email?.toLowerCase() === email);
+  if (!user) return json({ error: 'User not found' }, 404);
+  
+  const userId = user.id;
+  
+  // Get current profile
+  const { data: row, error: rowErr } = await serviceClient
+    .from('kv_store_0991178c')
+    .select('value')
+    .eq('key', `user:${userId}`)
+    .maybeSingle();
+    
+  if (rowErr || !row) return json({ error: 'Profile not found' }, 404);
+  
+  // Update profile to admin
+  const profile = row.value;
+  profile.role = 'admin';
+  profile.badge = 'gold';
+  profile.enrolledCourses = ['beginners', 'strategy'];
+  
+  const { error: updateError } = await serviceClient
+    .from('kv_store_0991178c')
+    .update({ value: profile })
+    .eq('key', `user:${userId}`);
+    
+  if (updateError) return json({ error: 'Failed to upgrade user' }, 500);
+  return json({ userId, email, message: 'User upgraded to admin successfully' });
+}
+
 function match(url: URL) {
   const p = url.pathname;
   if (p === '/health' || p.endsWith('/health')) return health;
   if (p === '/user/signup' || p.endsWith('/user/signup')) return signup;
+  if (p === '/bootstrap-admin' || p.endsWith('/bootstrap-admin')) return bootstrapAdmin;
+  if (p === '/upgrade-to-admin' || p.endsWith('/upgrade-to-admin')) return upgradeToAdmin;
   if (p.includes('/user/') && !p.endsWith('/signup')) return (req: Request) => getProfile(p.split('/'), req);
   return null;
 }
