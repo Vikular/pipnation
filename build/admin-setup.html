@@ -288,10 +288,12 @@
     </div>
     
     <script>
-        // Get API URL from environment or use default
+        // Get API URL and credentials
         const API_URL = window.location.origin.includes('localhost') 
             ? 'http://localhost:54321/functions/v1/api-server'
             : 'https://oexhltmmtcplmzxeymio.supabase.co/functions/v1/api-server';
+        
+        const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9leGhsdG1tdGNwbG16eGV5bWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA5Mjg1OTAsImV4cCI6MjA0NjUwNDU5MH0.wQT8O0Ri76UU3bRbKr1XpLxz30gJBU3_l-CnSMoHl2o';
         
         function switchTab(tab) {
             // Update tab buttons
@@ -327,6 +329,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ANON_KEY}`
                     },
                     body: JSON.stringify({ email, password, firstName, country })
                 });
@@ -386,6 +389,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ANON_KEY}`
                     },
                     body: JSON.stringify({ email, secretKey })
                 });
