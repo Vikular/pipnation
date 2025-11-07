@@ -9,7 +9,7 @@ export function DebugPanel() {
   const [healthData, setHealthData] = useState<any>(null);
   const [testing, setTesting] = useState(false);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   const testHealth = async () => {
     setTesting(true);

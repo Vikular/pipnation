@@ -39,7 +39,7 @@ export function PendingPaymentsTab({ accessToken }: PendingPaymentsTabProps) {
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   const loadPendingPayments = async () => {
     setLoading(true);

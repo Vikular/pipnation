@@ -24,7 +24,7 @@ export function AdminDashboard({ accessToken, onLogout }: AdminDashboardProps) {
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   useEffect(() => {
     if (currentView === 'dashboard') {

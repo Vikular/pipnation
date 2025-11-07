@@ -74,7 +74,7 @@ export function EnhancedAdminDashboard({ accessToken, onLogout }: EnhancedAdminD
   const [grantCourseUserId, setGrantCourseUserId] = useState<string>('');
   const [selectedCourse, setSelectedCourse] = useState('beginners');
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   useEffect(() => {
     if (currentTab === 'overview') {

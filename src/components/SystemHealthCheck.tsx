@@ -17,7 +17,7 @@ export function SystemHealthCheck() {
   const [copied, setCopied] = useState(false);
 
   const projectUrl = 'https://mkblwhxlrdcoflliwnyr.supabase.co';
-  const serverUrl = `${projectUrl}/functions/v1/make-server-0991178c`;
+  const serverUrl = `${projectUrl}/functions/v1/api-server`;
 
   useEffect(() => {
     checkHealth();
@@ -99,7 +99,7 @@ export function SystemHealthCheck() {
   };
 
   const copyDeployCommand = () => {
-    const command = 'supabase functions deploy make-server-0991178c --project-ref mkblwhxlrdcoflliwnyr';
+    const command = 'supabase functions deploy api-server --project-ref mkblwhxlrdcoflliwnyr';
     navigator.clipboard.writeText(command);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -267,7 +267,7 @@ export function SystemHealthCheck() {
                   <div className="text-xs text-orange-900">2. Run this command:</div>
                   <div className="relative">
                     <div className="text-xs font-mono bg-orange-100 p-3 rounded pr-12 overflow-auto text-orange-900">
-                      supabase functions deploy make-server-0991178c --project-ref mkblwhxlrdcoflliwnyr
+                      supabase functions deploy api-server --project-ref mkblwhxlrdcoflliwnyr
                     </div>
                     <Button
                       size="sm"

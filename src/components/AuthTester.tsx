@@ -37,7 +37,7 @@ export function AuthTester() {
       // Step 1: Create user via backend (with auto-confirmed email)
       addResult({ step: 'Creating user...', status: 'pending', message: 'Calling backend signup endpoint' });
       
-      const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+      const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
       const signupResponse = await fetch(`${apiUrl}/user/signup`, {
         method: 'POST',
         headers: {
@@ -194,7 +194,7 @@ export function AuthTester() {
       // Step 2: Fetch user profile from backend
       addResult({ step: 'Fetching profile...', status: 'pending', message: 'Calling backend API' });
 
-      const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+      const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
       const profileResponse = await fetch(`${apiUrl}/user/${data.user.id}`, {
         headers: {
           Authorization: `Bearer ${data.session.access_token}`,

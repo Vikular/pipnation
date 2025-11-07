@@ -8,7 +8,7 @@ export function BackendTest() {
   const [testResult, setTestResult] = useState<any>(null);
   const [testing, setTesting] = useState(false);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   const runTest = async () => {
     setTesting(true);

@@ -55,7 +55,7 @@ const verifyUser = async (accessToken: string) => {
 // ==================== PUBLIC ENDPOINTS ====================
 
 // Health check endpoint
-app.get("/make-server-0991178c/health", async (c) => {
+app.get("/api-server/health", async (c) => {
   const hasUrl = !!Deno.env.get('SUPABASE_URL');
   const hasAnonKey = !!Deno.env.get('SUPABASE_ANON_KEY');
   
@@ -71,7 +71,7 @@ app.get("/make-server-0991178c/health", async (c) => {
 });
 
 // Create user with auto-confirmed email (called from frontend during signup)
-app.post("/make-server-0991178c/user/signup", async (c) => {
+app.post("/api-server/user/signup", async (c) => {
   try {
     const { email: rawEmail, password, firstName, country, signupData } = await c.req.json();
     
@@ -199,7 +199,7 @@ app.post("/make-server-0991178c/user/signup", async (c) => {
 });
 
 // Create user profile (called after Supabase signup from frontend) - LEGACY, kept for compatibility
-app.post("/make-server-0991178c/user/create", async (c) => {
+app.post("/api-server/user/create", async (c) => {
   try {
     const { userId, email, firstName, country, signupData } = await c.req.json();
     
@@ -284,7 +284,7 @@ app.post("/make-server-0991178c/user/create", async (c) => {
 // ==================== AUTHENTICATED ENDPOINTS ====================
 
 // Get user profile
-app.get("/make-server-0991178c/user/:userId", async (c) => {
+app.get("/api-server/user/:userId", async (c) => {
   try {
     const userId = c.req.param('userId');
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -320,7 +320,7 @@ app.get("/make-server-0991178c/user/:userId", async (c) => {
 });
 
 // Update user role
-app.post("/make-server-0991178c/user/:userId/role", async (c) => {
+app.post("/api-server/user/:userId/role", async (c) => {
   try {
     const userId = c.req.param('userId');
     const { newRole } = await c.req.json();
@@ -351,7 +351,7 @@ app.post("/make-server-0991178c/user/:userId/role", async (c) => {
 });
 
 // Mark lesson as complete
-app.post("/make-server-0991178c/progress/lesson", async (c) => {
+app.post("/api-server/progress/lesson", async (c) => {
   try {
     const { userId, courseLevel, lessonId } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -413,7 +413,7 @@ app.post("/make-server-0991178c/progress/lesson", async (c) => {
 });
 
 // Submit quiz score
-app.post("/make-server-0991178c/quiz/submit", async (c) => {
+app.post("/api-server/quiz/submit", async (c) => {
   try {
     const { userId, quizId, score, courseLevel } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -459,7 +459,7 @@ app.post("/make-server-0991178c/quiz/submit", async (c) => {
 });
 
 // Submit FTMO proof
-app.post("/make-server-0991178c/ftmo/submit", async (c) => {
+app.post("/api-server/ftmo/submit", async (c) => {
   try {
     const { userId, proofUrl, notes } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -499,7 +499,7 @@ app.post("/make-server-0991178c/ftmo/submit", async (c) => {
 // ==================== ADMIN ENDPOINTS ====================
 
 // Get all users (admin only)
-app.get("/make-server-0991178c/admin/users", async (c) => {
+app.get("/api-server/admin/users", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     
@@ -524,7 +524,7 @@ app.get("/make-server-0991178c/admin/users", async (c) => {
 });
 
 // Get comprehensive students data (admin only)
-app.get("/make-server-0991178c/admin/students/data", async (c) => {
+app.get("/api-server/admin/students/data", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     
@@ -562,7 +562,7 @@ app.get("/make-server-0991178c/admin/students/data", async (c) => {
 });
 
 // Get pending FTMO submissions (admin only)
-app.get("/make-server-0991178c/admin/ftmo/pending", async (c) => {
+app.get("/api-server/admin/ftmo/pending", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     
@@ -588,7 +588,7 @@ app.get("/make-server-0991178c/admin/ftmo/pending", async (c) => {
 });
 
 // Verify FTMO submission (admin only)
-app.post("/make-server-0991178c/admin/ftmo/verify", async (c) => {
+app.post("/api-server/admin/ftmo/verify", async (c) => {
   try {
     const { submissionId, approved } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -636,7 +636,7 @@ app.post("/make-server-0991178c/admin/ftmo/verify", async (c) => {
 });
 
 // Upload course material (admin only)
-app.post("/make-server-0991178c/admin/course/upload", async (c) => {
+app.post("/api-server/admin/course/upload", async (c) => {
   try {
     const { courseId, lessonId, materialType, title, description, url, order } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -680,7 +680,7 @@ app.post("/make-server-0991178c/admin/course/upload", async (c) => {
 });
 
 // Get course materials
-app.get("/make-server-0991178c/course/:courseId/materials", async (c) => {
+app.get("/api-server/course/:courseId/materials", async (c) => {
   try {
     const courseId = c.req.param('courseId');
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -714,7 +714,7 @@ app.get("/make-server-0991178c/course/:courseId/materials", async (c) => {
 // ==================== ADMIN BOOTSTRAP (ONE-TIME USE) ====================
 
 // Bootstrap admin user (ONLY use this ONCE to create your first admin)
-app.post("/make-server-0991178c/bootstrap-admin", async (c) => {
+app.post("/api-server/bootstrap-admin", async (c) => {
   try {
     const { email: rawEmail, password, firstName, country } = await c.req.json();
     
@@ -806,7 +806,7 @@ app.post("/make-server-0991178c/bootstrap-admin", async (c) => {
 });
 
 // Upgrade existing user to admin (use if you already have an account)
-app.post("/make-server-0991178c/upgrade-to-admin", async (c) => {
+app.post("/api-server/upgrade-to-admin", async (c) => {
   try {
     const { email: rawEmail, secretKey } = await c.req.json();
     
@@ -853,7 +853,7 @@ app.post("/make-server-0991178c/upgrade-to-admin", async (c) => {
 // ==================== ENHANCED ADMIN ENDPOINTS ====================
 
 // Get live user activity (admin only)
-app.get("/make-server-0991178c/admin/activity/live", async (c) => {
+app.get("/api-server/admin/activity/live", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     
@@ -890,7 +890,7 @@ app.get("/make-server-0991178c/admin/activity/live", async (c) => {
 });
 
 // Get user full profile details (admin only)
-app.get("/make-server-0991178c/admin/user/:userId/full", async (c) => {
+app.get("/api-server/admin/user/:userId/full", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     const targetUserId = c.req.param('userId');
@@ -933,7 +933,7 @@ app.get("/make-server-0991178c/admin/user/:userId/full", async (c) => {
 });
 
 // Bulk user status update (admin only)
-app.post("/make-server-0991178c/admin/users/bulk-update", async (c) => {
+app.post("/api-server/admin/users/bulk-update", async (c) => {
   try {
     const { userIds, updates } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -984,7 +984,7 @@ app.post("/make-server-0991178c/admin/users/bulk-update", async (c) => {
 });
 
 // Suspend/Activate user account (admin only)
-app.post("/make-server-0991178c/admin/user/:userId/status", async (c) => {
+app.post("/api-server/admin/user/:userId/status", async (c) => {
   try {
     const { status, reason } = await c.req.json(); // status: 'active' | 'suspended'
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1027,7 +1027,7 @@ app.post("/make-server-0991178c/admin/user/:userId/status", async (c) => {
 });
 
 // Delete user (admin only)
-app.delete("/make-server-0991178c/admin/user/:userId", async (c) => {
+app.delete("/api-server/admin/user/:userId", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     const targetUserId = c.req.param('userId');
@@ -1107,7 +1107,7 @@ app.delete("/make-server-0991178c/admin/user/:userId", async (c) => {
 });
 
 // Get analytics data (admin only)
-app.get("/make-server-0991178c/admin/analytics", async (c) => {
+app.get("/api-server/admin/analytics", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     
@@ -1170,7 +1170,7 @@ app.get("/make-server-0991178c/admin/analytics", async (c) => {
 });
 
 // Broadcast message to users (admin only)
-app.post("/make-server-0991178c/admin/broadcast", async (c) => {
+app.post("/api-server/admin/broadcast", async (c) => {
   try {
     const { message, targetRole, targetUsers } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1210,7 +1210,7 @@ app.post("/make-server-0991178c/admin/broadcast", async (c) => {
 });
 
 // Manual payment verification (admin only)
-app.post("/make-server-0991178c/admin/payment/verify", async (c) => {
+app.post("/api-server/admin/payment/verify", async (c) => {
   try {
     const { userId, courseId, amount, notes } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1274,7 +1274,7 @@ app.post("/make-server-0991178c/admin/payment/verify", async (c) => {
 });
 
 // Upgrade user level/badge (admin only)
-app.post("/make-server-0991178c/admin/user/:userId/upgrade-level", async (c) => {
+app.post("/api-server/admin/user/:userId/upgrade-level", async (c) => {
   try {
     const { level, badge } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1339,7 +1339,7 @@ app.post("/make-server-0991178c/admin/user/:userId/upgrade-level", async (c) => 
 });
 
 // Grant course access (admin only)
-app.post("/make-server-0991178c/admin/user/:userId/grant-course", async (c) => {
+app.post("/api-server/admin/user/:userId/grant-course", async (c) => {
   try {
     const { courseId, reason } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1454,7 +1454,7 @@ app.post("/make-server-0991178c/admin/user/:userId/grant-course", async (c) => {
 });
 
 // Revoke course access (admin only)
-app.post("/make-server-0991178c/admin/user/:userId/revoke-course", async (c) => {
+app.post("/api-server/admin/user/:userId/revoke-course", async (c) => {
   try {
     const { courseId, reason } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1517,7 +1517,7 @@ app.post("/make-server-0991178c/admin/user/:userId/revoke-course", async (c) => 
 });
 
 // Submit pending payment (no receipt upload required)
-app.post("/make-server-0991178c/payment/submit-pending", async (c) => {
+app.post("/api-server/payment/submit-pending", async (c) => {
   try {
     const { userId, courseId, amount, paymentMethod } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1579,7 +1579,7 @@ app.post("/make-server-0991178c/payment/submit-pending", async (c) => {
 });
 
 // Submit payment receipt for verification
-app.post("/make-server-0991178c/payment/submit-receipt", async (c) => {
+app.post("/api-server/payment/submit-receipt", async (c) => {
   try {
     const { userId, courseId, amount, receiptData, fileName, fileType, notes } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1682,7 +1682,7 @@ app.post("/make-server-0991178c/payment/submit-receipt", async (c) => {
 });
 
 // Get pending payments for a specific user
-app.get("/make-server-0991178c/user/:userId/pending-payments", async (c) => {
+app.get("/api-server/user/:userId/pending-payments", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     const userId = c.req.param('userId');
@@ -1716,7 +1716,7 @@ app.get("/make-server-0991178c/user/:userId/pending-payments", async (c) => {
 });
 
 // Get all pending payments (admin only)
-app.get("/make-server-0991178c/admin/pending-payments", async (c) => {
+app.get("/api-server/admin/pending-payments", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     
@@ -1760,7 +1760,7 @@ app.get("/make-server-0991178c/admin/pending-payments", async (c) => {
 });
 
 // Get receipt signed URL for viewing (admin only)
-app.get("/make-server-0991178c/admin/receipt/:paymentId", async (c) => {
+app.get("/api-server/admin/receipt/:paymentId", async (c) => {
   try {
     const paymentId = c.req.param('paymentId');
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1809,7 +1809,7 @@ app.get("/make-server-0991178c/admin/receipt/:paymentId", async (c) => {
 });
 
 // Approve payment receipt (admin only)
-app.post("/make-server-0991178c/admin/payment/approve-receipt", async (c) => {
+app.post("/api-server/admin/payment/approve-receipt", async (c) => {
   try {
     const { paymentId } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1899,7 +1899,7 @@ app.post("/make-server-0991178c/admin/payment/approve-receipt", async (c) => {
 });
 
 // Reject payment receipt (admin only)
-app.post("/make-server-0991178c/admin/payment/reject-receipt", async (c) => {
+app.post("/api-server/admin/payment/reject-receipt", async (c) => {
   try {
     const { paymentId, reason } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -1956,7 +1956,7 @@ app.post("/make-server-0991178c/admin/payment/reject-receipt", async (c) => {
 // ==================== PAYMENT ENDPOINTS ====================
 
 // Process course enrollment payment
-app.post("/make-server-0991178c/payment/enroll", async (c) => {
+app.post("/api-server/payment/enroll", async (c) => {
   try {
     const { userId, courseId, amount, paymentMethod } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
@@ -2036,7 +2036,7 @@ app.post("/make-server-0991178c/payment/enroll", async (c) => {
 });
 
 // Mark course as completed
-app.post("/make-server-0991178c/course/complete", async (c) => {
+app.post("/api-server/course/complete", async (c) => {
   try {
     const { userId, courseId } = await c.req.json();
     const accessToken = c.req.header('Authorization')?.split(' ')[1];

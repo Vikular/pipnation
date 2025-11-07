@@ -38,7 +38,7 @@ export function QuickAuthCheck() {
 
     // Check 2: Server connection
     try {
-      const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+      const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
       const response = await fetch(`${apiUrl}/health`, {
         method: 'GET',
       });

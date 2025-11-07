@@ -31,7 +31,7 @@ export function PaymentReceiptUpload({
   const [notes, setNotes] = useState('');
   const [uploading, setUploading] = useState(false);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   const acceptedFormats = {
     'image/png': ['.png'],

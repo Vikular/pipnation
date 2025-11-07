@@ -101,7 +101,7 @@ export function CourseEnrollment({ enrolledCourses, onEnroll, onBack, userName, 
     if (!userId || !accessToken) return;
     
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-0991178c/user/${userId}/pending-payments`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/api-server/user/${userId}/pending-payments`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

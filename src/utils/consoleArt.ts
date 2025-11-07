@@ -27,7 +27,7 @@ export const showDemoModeWelcome = () => {
   console.log('\n');
   console.log('%c📝 For Production:', styles.subtitle);
   console.log('%c  Deploy backend with:', styles.text);
-  console.log('%c  supabase functions deploy make-server-0991178c', styles.code);
+  console.log('%c  supabase functions deploy api-server', styles.code);
   console.log('\n');
   console.log('%c🎉 Everything is working perfectly!', styles.success);
   console.log('\n');

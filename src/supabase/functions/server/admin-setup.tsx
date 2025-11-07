@@ -10,7 +10,7 @@
  * 
  * Or, you can create a one-time endpoint to bootstrap an admin user:
  * 
- * POST /make-server-0991178c/bootstrap-admin
+ * POST /api-server/bootstrap-admin
  * Body: { email, password, firstName, country }
  * 
  * This endpoint should be removed or secured after initial setup.
@@ -22,7 +22,7 @@ import * as kv from "./kv_store.tsx";
 
 export function setupAdminRoutes(app: Hono) {
   // CAUTION: This endpoint should be removed or secured in production
-  app.post("/make-server-0991178c/bootstrap-admin", async (c) => {
+  app.post("/api-server/bootstrap-admin", async (c) => {
     try {
       const { email, password, firstName, country } = await c.req.json();
       

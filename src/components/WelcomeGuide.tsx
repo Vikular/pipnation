@@ -131,7 +131,7 @@ export function WelcomeGuide() {
                     Deploy the backend to enable real authentication:
                   </p>
                   <code className="text-xs bg-white p-2 rounded block overflow-x-auto whitespace-nowrap">
-                    supabase functions deploy make-server-0991178c
+                    supabase functions deploy api-server
                   </code>
                   <p className="text-xs text-gray-600 mt-2">
                     See <strong>DEMO_MODE_ACTIVE.md</strong> for details

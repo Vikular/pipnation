@@ -41,7 +41,7 @@ export function AdminStudentsData({ accessToken, onBack }: AdminStudentsDataProp
   const [roleFilter, setRoleFilter] = useState('all');
   const [badgeFilter, setBadgeFilter] = useState('all');
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   useEffect(() => {
     loadStudentsData();

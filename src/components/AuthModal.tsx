@@ -59,6 +59,9 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
   const [tradingPreferencesOther, setTradingPreferencesOther] = useState('');
   const [currentMode, setCurrentMode] = useState(mode);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
 
   // Update mode when prop changes
   useEffect(() => {
@@ -80,6 +83,9 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
       setWhatsappNumber('');
       setTradingPreferences([]);
       setTradingPreferencesOther('');
+      setShowForgotPassword(false);
+      setResetEmail('');
+      setResetSent(false);
     }
   }, [isOpen]);
 
@@ -118,6 +124,31 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
       await onAuth(email, password);
     }
     
+    setIsLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { supabase } = await import('../utils/supabase/client');
+      // Redirect to root with hash parameters that App.tsx will detect
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/`,
+      });
+
+      if (error) {
+        console.error('Password reset error:', error);
+        alert('Failed to send reset email. Please try again.');
+      } else {
+        setResetSent(true);
+      }
+    } catch (error) {
+      console.error('Password reset exception:', error);
+      alert('Failed to send reset email. Please try again.');
+    }
+
     setIsLoading(false);
   };
 
@@ -218,6 +249,95 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
             </CardHeader>
 
             <CardContent className="relative">
+              {/* Forgot Password View */}
+              {showForgotPassword ? (
+                <div className="space-y-5">
+                  {resetSent ? (
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-center space-y-4 py-8"
+                    >
+                      <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-8 h-8 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">Check Your Email</h3>
+                        <p className="text-sm text-gray-600">
+                          We've sent a password reset link to <strong>{resetEmail}</strong>
+                        </p>
+                        <p className="text-sm text-gray-500 mt-2">
+                          Click the link in the email to reset your password.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          setShowForgotPassword(false);
+                          setResetSent(false);
+                          setResetEmail('');
+                        }}
+                        className="w-full mt-4"
+                      >
+                        Back to Login
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <form onSubmit={handleForgotPassword} className="space-y-5">
+                      <div className="text-center space-y-2 mb-6">
+                        <h3 className="text-lg font-semibold">Reset Your Password</h3>
+                        <p className="text-sm text-gray-600">
+                          Enter your email address and we'll send you a link to reset your password.
+                        </p>
+                      </div>
+
+                      <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="space-y-2"
+                      >
+                        <Label htmlFor="resetEmail">Email Address</Label>
+                        <div className="relative group">
+                          <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                          <Input
+                            id="resetEmail"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            className="pl-10 h-11 border-2 focus:border-blue-600 transition-all"
+                            required
+                          />
+                        </div>
+                      </motion.div>
+
+                      <Button
+                        type="submit"
+                        className="w-full h-12 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                          />
+                        ) : (
+                          'Send Reset Link'
+                        )}
+                      </Button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(false)}
+                        className="w-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        ← Back to Login
+                      </button>
+                    </form>
+                  )}
+                </div>
+              ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Login Form - Simple */}
                 {currentMode === 'login' && (
@@ -263,6 +383,17 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
                         />
                       </div>
                     </motion.div>
+
+                    {/* Forgot Password Link */}
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-all"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                   </>
                 )}
 
@@ -601,37 +732,40 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
                   </Button>
                 </motion.div>
               </form>
+              )}
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className="mt-6 text-center"
-              >
-                {currentMode === 'login' ? (
-                  <p className="text-sm text-gray-600">
-                    Don't have an account?{' '}
-                    <button
-                      onClick={() => setCurrentMode('signup')}
-                      className="text-blue-600 hover:text-blue-700 hover:underline transition-all"
-                    >
-                      Sign up
-                    </button>
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-600">
-                    Already have an account?{' '}
-                    <button
-                      onClick={() => setCurrentMode('login')}
-                      className="text-blue-600 hover:text-blue-700 hover:underline transition-all"
-                    >
-                      Sign in
-                    </button>
-                  </p>
-                )}
-              </motion.div>
+              {!showForgotPassword && (
+                <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="mt-6 text-center"
+                >
+                  {currentMode === 'login' ? (
+                    <p className="text-sm text-gray-600">
+                      Don't have an account?{' '}
+                      <button
+                        onClick={() => setCurrentMode('signup')}
+                        className="text-blue-600 hover:text-blue-700 hover:underline transition-all"
+                      >
+                        Sign up
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      Already have an account?{' '}
+                      <button
+                        onClick={() => setCurrentMode('login')}
+                        className="text-blue-600 hover:text-blue-700 hover:underline transition-all"
+                      >
+                        Sign in
+                      </button>
+                    </p>
+                  )}
+                </motion.div>
 
-              {isLeadCapture && (
+                {isLeadCapture && (
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -653,6 +787,8 @@ export function AuthModal({ isOpen, onClose, mode, onAuth }: AuthModalProps) {
                     ))}
                   </div>
                 </motion.div>
+                )}
+                </>
               )}
             </CardContent>
           </Card>

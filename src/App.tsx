@@ -13,6 +13,8 @@ import { CommunityPage } from './components/CommunityPage';
 import { DebugPanel } from './components/DebugPanel';
 import { ServerDiagnostics } from './components/ServerDiagnostics';
 import { AuthTester } from './components/AuthTester';
+import { ResetError } from './components/ResetError';
+import { ResetPassword } from './components/ResetPassword';
 import { projectId, publicAnonKey } from './utils/supabase/info';
 import { supabase } from './utils/supabase/client';
 import { Toaster } from './components/ui/sonner';
@@ -55,7 +57,7 @@ export default function App() {
   const [lessonViewerOpen, setLessonViewerOpen] = useState(false);
   const [ftmoModalOpen, setFtmoModalOpen] = useState(false);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   // Check for existing session on mount
   useEffect(() => {
@@ -382,6 +384,13 @@ export default function App() {
   // Show diagnostics if there's a '?diagnostics' query parameter
   const showDiagnostics = typeof window !== 'undefined' && window.location.search.includes('diagnostics');
   const showAuthTester = typeof window !== 'undefined' && window.location.search.includes('test-auth');
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
+  const hasResetError = hash.includes('error=');
+  
+  // Check for password reset token in URL hash
+  const isPasswordReset = typeof window !== 'undefined' && 
+    window.location.hash.includes('type=recovery') && 
+    window.location.hash.includes('access_token');
 
   if (showDiagnostics) {
     return (
@@ -401,6 +410,14 @@ export default function App() {
 
   if (showAuthTester) {
     return <AuthTester />;
+  }
+
+  if (hasResetError) {
+    return <ResetError onOpenLogin={() => setAuthModalOpen(true)} />;
+  }
+
+  if (isPasswordReset) {
+    return <ResetPassword />;
   }
 
   return (

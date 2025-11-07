@@ -38,7 +38,7 @@ export function AdminCourseUpload({ accessToken, onBack }: AdminCourseUploadProp
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const apiUrl = `https://${projectId}.supabase.co/functions/v1/make-server-0991178c`;
+  const apiUrl = `https://${projectId}.supabase.co/functions/v1/api-server`;
 
   useEffect(() => {
     if (courseId) {
