@@ -118,15 +118,26 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
   const canAccessSignalRoom = user.role === 'pro-trader' || user.role === 'funded-trader';
   const isLead = user.role === 'lead';
 
-  // Safe progress calculation - avoid NaN for 0/0
-  const foundationProgress = user.progress?.foundation?.total > 0 
-    ? (user.progress.foundation.completed / user.progress.foundation.total) * 100 
+  // Safe progress calculation - handle undefined progress object
+  const progress = user.progress || {
+    foundation: { completed: 0, total: 0 },
+    advanced: { completed: 0, total: 0 },
+    beginners: { completed: 0, total: 0 },
+    strategy: { completed: 0, total: 0 }
+  };
+  
+  const foundationProgress = progress.foundation?.total > 0 
+    ? (progress.foundation.completed / progress.foundation.total) * 100 
     : 0;
-  const advancedProgress = user.progress?.advanced?.total > 0 
-    ? (user.progress.advanced.completed / user.progress.advanced.total) * 100 
+  const advancedProgress = progress.advanced?.total > 0 
+    ? (progress.advanced.completed / progress.advanced.total) * 100 
     : 0;
 
-  console.log('📊 Progress calculated:', { foundationProgress, advancedProgress });
+  console.log('📊 Progress calculated:', { 
+    hasProgress: !!user.progress,
+    foundationProgress, 
+    advancedProgress 
+  });
 
   try {
     return (
@@ -298,7 +309,7 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
               </CardHeader>
               <CardContent className="pb-3 md:pb-4">
                 <div className="text-2xl md:text-3xl mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {user.progress.foundation.completed}/{user.progress.foundation.total}
+                  {progress.foundation.completed}/{progress.foundation.total}
                 </div>
                 <Progress value={foundationProgress} className="h-1.5 md:h-2 mb-1" />
                 <div className="text-xs text-gray-600">{Math.round(foundationProgress)}%</div>
@@ -322,7 +333,7 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
               </CardHeader>
               <CardContent className="pb-3 md:pb-4">
                 <div className="text-2xl md:text-3xl mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  {canAccessAdvanced ? `${user.progress.advanced.completed}/${user.progress.advanced.total}` : 'Locked'}
+                  {canAccessAdvanced ? `${progress.advanced.completed}/${progress.advanced.total}` : 'Locked'}
                 </div>
                 {canAccessAdvanced ? (
                   <>
@@ -515,7 +526,7 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
                     </div>
                     <div className="text-center">
                       <div className="text-2xl md:text-3xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        {user.progress.foundation.completed}/{user.progress.foundation.total}
+                        {progress.foundation.completed}/{progress.foundation.total}
                       </div>
                       <div className="text-xs md:text-sm text-gray-600">Complete</div>
                     </div>
@@ -606,7 +617,7 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
                       </div>
                       <div className="text-center">
                         <div className="text-2xl md:text-3xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                          {user.progress.advanced.completed}/{user.progress.advanced.total}
+                          {progress.advanced.completed}/{progress.advanced.total}
                         </div>
                         <div className="text-xs md:text-sm text-gray-600">Complete</div>
                       </div>
