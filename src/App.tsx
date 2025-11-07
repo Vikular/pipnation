@@ -159,18 +159,30 @@ export default function App() {
         const errorText = await response.text();
         console.error(`❌ Error response:`, errorText);
         
-        // Only logout if it's an auth error (401/403), not if profile doesn't exist (404)
-        if (response.status === 401 || response.status === 403) {
-          console.log('🔒 Authentication error - logging out');
-          handleLogout();
-        } else if (response.status === 404 && retryCount < 2) {
-          // Profile might not be ready yet, retry after a short delay
-          console.log(`⏳ Profile not found, retrying in 1 second... (attempt ${retryCount + 1}/3)`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return fetchUserProfile(userId, token, retryCount + 1);
-        } else {
-          // For other errors, show error but keep user logged in
-          toast.error('Failed to load profile. Please refresh the page.');
+        // Handle 404 - profile might not exist yet or need creation
+        if (response.status === 404) {
+          if (retryCount < 3) {
+            console.log(`⏳ Profile not found, retrying in 2 seconds... (attempt ${retryCount + 1}/4)`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return fetchUserProfile(userId, token, retryCount + 1);
+          } else {
+            console.error('❌ Profile not found after multiple retries');
+            toast.error('Profile not found. Please contact support or try signing up again.');
+            // Don't logout - just show error
+            setCurrentView('landing');
+          }
+        }
+        // Handle 401/403 - invalid/expired token
+        else if (response.status === 401 || response.status === 403) {
+          console.log('🔒 Authentication error - invalid or expired token');
+          // Sign out from Supabase which will trigger SIGNED_OUT event
+          await supabase.auth.signOut();
+          toast.error('Session expired. Please log in again.');
+        }
+        // Other errors
+        else {
+          console.error('❌ Unexpected error fetching profile');
+          toast.error('Failed to load profile. Please try again.');
         }
       }
     } catch (error) {
