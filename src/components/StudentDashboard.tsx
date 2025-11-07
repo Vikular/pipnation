@@ -35,6 +35,14 @@ interface StudentDashboardProps {
 }
 
 export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, accessToken, onViewChange }: StudentDashboardProps) {
+  console.log('🎨 StudentDashboard rendering with user:', {
+    userId: user.userId,
+    email: user.email,
+    role: user.role,
+    enrolledCourses: user.enrolledCourses,
+    progress: user.progress,
+  });
+
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
@@ -110,10 +118,18 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
   const canAccessSignalRoom = user.role === 'pro-trader' || user.role === 'funded-trader';
   const isLead = user.role === 'lead';
 
-  const foundationProgress = (user.progress.foundation.completed / user.progress.foundation.total) * 100;
-  const advancedProgress = (user.progress.advanced.completed / user.progress.advanced.total) * 100;
+  // Safe progress calculation - avoid NaN for 0/0
+  const foundationProgress = user.progress?.foundation?.total > 0 
+    ? (user.progress.foundation.completed / user.progress.foundation.total) * 100 
+    : 0;
+  const advancedProgress = user.progress?.advanced?.total > 0 
+    ? (user.progress.advanced.completed / user.progress.advanced.total) * 100 
+    : 0;
 
-  return (
+  console.log('📊 Progress calculated:', { foundationProgress, advancedProgress });
+
+  try {
+    return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <motion.header
@@ -909,4 +925,25 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
       </div>
     </div>
   );
+  } catch (error) {
+    console.error('❌ StudentDashboard render error:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-2">Dashboard Error</h2>
+          <p className="text-gray-600 mb-4">Something went wrong loading the dashboard.</p>
+          <pre className="text-xs text-left bg-gray-100 p-3 rounded overflow-auto mb-4">
+            {error instanceof Error ? error.message : String(error)}
+          </pre>
+          <button
+            onClick={onLogout}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 }
