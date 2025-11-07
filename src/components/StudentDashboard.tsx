@@ -19,8 +19,8 @@ interface UserProfile {
     foundation: { completed: number; total: number };
     advanced: { completed: number; total: number };
   };
-  completedLessons: string[];
-  quizScores: Record<string, any>;
+  completedLessons?: string[];
+  quizScores?: Record<string, any>;
   advancedUnlocked?: boolean;
   enrolledCourses?: string[];
 }
@@ -111,7 +111,7 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
   };
 
   const isLessonCompleted = (lessonId: string) => {
-    return user.completedLessons.includes(lessonId);
+    return user.completedLessons?.includes(lessonId) || false;
   };
 
   const canAccessAdvanced = user.role === 'student' && user.advancedUnlocked;
