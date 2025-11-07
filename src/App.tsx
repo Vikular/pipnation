@@ -140,11 +140,14 @@ export default function App() {
       });
 
       if (response.ok) {
-        const profile = await response.json();
+        const profileText = await response.text();
+        console.log(`📥 Raw profile response:`, profileText);
+        const profile = JSON.parse(profileText);
         console.log(`✅ Profile fetched successfully:`, {
           userId: profile.userId,
           email: profile.email,
           role: profile.role,
+          roleType: typeof profile.role,
           enrolledCourses: profile.enrolledCourses,
         });
         
