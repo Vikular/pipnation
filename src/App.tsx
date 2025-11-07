@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { LandingPage } from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
 import { StudentDashboard } from './components/StudentDashboard';
@@ -146,14 +147,21 @@ export default function App() {
           role: profile.role,
           enrolledCourses: profile.enrolledCourses,
         });
+        
+        console.log('📝 Setting user profile state...');
         setUserProfile(profile);
+        console.log('✅ User profile state set');
         
         // Route to appropriate view based on role
+        console.log(`🔀 Routing to view based on role: ${profile.role}`);
         if (profile.role === 'admin') {
+          console.log('→ Setting view to: admin');
           setCurrentView('admin');
         } else {
+          console.log('→ Setting view to: dashboard');
           setCurrentView('dashboard');
         }
+        console.log(`✅ View set to: ${profile.role === 'admin' ? 'admin' : 'dashboard'}`);
       } else {
         console.error(`❌ Failed to fetch profile. Status: ${response.status}`);
         const errorText = await response.text();
@@ -527,6 +535,21 @@ export default function App() {
           accessToken={accessToken}
           onViewChange={handleViewChange}
         />
+      )}
+
+      {/* Loading state for dashboard without profile */}
+      {currentView === 'dashboard' && !userProfile && (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="text-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"
+            />
+            <h2 className="text-2xl mb-2">Loading your dashboard...</h2>
+            <p className="text-gray-600">Please wait while we fetch your profile</p>
+          </div>
+        </div>
       )}
 
       {currentView === 'courses' && userProfile && (
