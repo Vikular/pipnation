@@ -61,13 +61,61 @@ export default function App() {
 
   // Check for existing session on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    const storedUserId = localStorage.getItem('userId');
-    
-    if (storedToken && storedUserId) {
-      setAccessToken(storedToken);
-      fetchUserProfile(storedUserId, storedToken);
-    }
+    // Check for existing Supabase session first
+    const restoreSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ Error getting session:', error);
+          // Clear invalid tokens
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('userId');
+          return;
+        }
+        
+        if (session?.access_token && session?.user?.id) {
+          console.log('✅ Restored Supabase session for user:', session.user.id);
+          setAccessToken(session.access_token);
+          localStorage.setItem('accessToken', session.access_token);
+          localStorage.setItem('userId', session.user.id);
+          await fetchUserProfile(session.user.id, session.access_token);
+        } else {
+          // No session found, clear storage
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('userId');
+        }
+      } catch (error) {
+        console.error('❌ Session restoration error:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userId');
+      }
+    };
+
+    restoreSession();
+
+    // Listen for auth state changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔔 Auth state changed:', event);
+      
+      if (event === 'SIGNED_IN' && session?.access_token) {
+        setAccessToken(session.access_token);
+        localStorage.setItem('accessToken', session.access_token);
+        localStorage.setItem('userId', session.user.id);
+        await fetchUserProfile(session.user.id, session.access_token);
+      } else if (event === 'SIGNED_OUT') {
+        handleLogout();
+      } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
+        console.log('🔄 Token refreshed');
+        setAccessToken(session.access_token);
+        localStorage.setItem('accessToken', session.access_token);
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -241,7 +289,16 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Sign out from Supabase (clears session)
+      await supabase.auth.signOut();
+      console.log('✅ Signed out from Supabase');
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+    }
+    
+    // Clear local state
     setAccessToken('');
     setUserProfile(null);
     setCurrentView('landing');
