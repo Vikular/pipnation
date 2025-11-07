@@ -61,14 +61,17 @@ export default function App() {
 
   // Check for existing session on mount
   useEffect(() => {
+    let mounted = true;
+
     // Check for existing Supabase session first
     const restoreSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
+        if (!mounted) return;
+        
         if (error) {
           console.error('❌ Error getting session:', error);
-          // Clear invalid tokens
           localStorage.removeItem('accessToken');
           localStorage.removeItem('userId');
           return;
@@ -81,7 +84,7 @@ export default function App() {
           localStorage.setItem('userId', session.user.id);
           await fetchUserProfile(session.user.id, session.access_token);
         } else {
-          // No session found, clear storage
+          console.log('ℹ️ No active session found');
           localStorage.removeItem('accessToken');
           localStorage.removeItem('userId');
         }
@@ -96,6 +99,8 @@ export default function App() {
 
     // Listen for auth state changes (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      
       console.log('🔔 Auth state changed:', event);
       
       if (event === 'SIGNED_IN' && session?.access_token) {
@@ -104,7 +109,11 @@ export default function App() {
         localStorage.setItem('userId', session.user.id);
         await fetchUserProfile(session.user.id, session.access_token);
       } else if (event === 'SIGNED_OUT') {
-        handleLogout();
+        setAccessToken('');
+        setUserProfile(null);
+        setCurrentView('landing');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userId');
       } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
         console.log('🔄 Token refreshed');
         setAccessToken(session.access_token);
@@ -112,8 +121,9 @@ export default function App() {
       }
     });
 
-    // Cleanup subscription on unmount
+    // Cleanup
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
