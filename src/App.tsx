@@ -242,8 +242,9 @@ export default function App() {
 
         toast.success('Account created successfully!');
         
-        // Wait a moment for Supabase to fully process the user creation
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Wait for Supabase to fully process the user creation and profile storage
+        console.log('⏳ Waiting for backend to complete profile creation...');
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
         // Now sign in to get the session
         console.log('🔐 Signing in to get session with email:', email);

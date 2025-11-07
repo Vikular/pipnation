@@ -89,23 +89,63 @@ async function signup(req: Request) {
 
 async function getProfile(urlParts: string[], req: Request) {
   if (!anonClient || !serviceClient) return json({ error: 'Server misconfigured' }, 500);
+  
   const userId = urlParts[3];
-  if (!userId) return json({ error: 'Missing userId' }, 400);
+  if (!userId) {
+    console.error('❌ Missing userId in URL');
+    return json({ error: 'Missing userId' }, 400);
+  }
+  
   const authHeader = req.headers.get('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!token) return json({ error: 'Missing auth token' }, 401);
+  if (!token) {
+    console.error('❌ Missing auth token');
+    return json({ error: 'Missing auth token' }, 401);
+  }
+  
+  // Validate token
+  console.log(`🔍 Validating token for user: ${userId}`);
   const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return json({ error: 'Invalid or expired token' }, 401);
+  
+  if (error) {
+    console.error('❌ Token validation error:', error.message);
+    return json({ error: 'Invalid or expired token', details: error.message }, 401);
+  }
+  
+  if (!data.user) {
+    console.error('❌ No user data from token');
+    return json({ error: 'Invalid token' }, 401);
+  }
+  
   const requesterId = data.user.id;
+  console.log(`✅ Token valid for user: ${requesterId}`);
+  
+  // Check authorization
   const requesterRole = (data.user.user_metadata as any)?.role || 'lead';
-  if (requesterId !== userId && requesterRole !== 'admin') return json({ error: 'Forbidden' }, 403);
+  if (requesterId !== userId && requesterRole !== 'admin') {
+    console.error(`❌ Forbidden: ${requesterId} trying to access ${userId}`);
+    return json({ error: 'Forbidden' }, 403);
+  }
+  
+  // Fetch profile
+  console.log(`🔍 Fetching profile for: ${userId}`);
   const { data: row, error: rowErr } = await serviceClient
     .from('kv_store_0991178c')
     .select('value')
     .eq('key', `user:${userId}`)
     .maybeSingle();
-  if (rowErr) return json({ error: rowErr.message }, 500);
-  if (!row) return json({ error: 'Profile not found' }, 404);
+    
+  if (rowErr) {
+    console.error('❌ Database error:', rowErr.message);
+    return json({ error: rowErr.message }, 500);
+  }
+  
+  if (!row) {
+    console.error(`❌ Profile not found for user: ${userId}`);
+    return json({ error: 'Profile not found' }, 404);
+  }
+  
+  console.log(`✅ Profile found for: ${userId}`);
   return json(row.value);
 }
 
