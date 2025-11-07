@@ -130,84 +130,122 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchUserProfile = async (userId: string, token: string, retryCount = 0, silent = false) => {
+  // Guard to prevent overlapping profile fetches causing race/logout loops
+  const [profileFetchInFlight, setProfileFetchInFlight] = useState(false);
+  const fetchUserProfile = async (userId: string, token: string, retryCount = 0, silent = false): Promise<void> => {
+    if (profileFetchInFlight) {
+      console.log('⏳ Skipping profile fetch – previous request still in flight');
+      return;
+    }
+    setProfileFetchInFlight(true);
+    const startedAt = Date.now();
     try {
-      console.log(`🔄 Fetching user profile for userId: ${userId} (attempt ${retryCount + 1})`);
-      const response = await fetch(`${apiUrl}/user/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      console.log(`🔄 Fetching user profile userId=${userId} attempt=${retryCount + 1}`);
+      let response: Response | null = null;
+      try {
+        response = await fetch(`${apiUrl}/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (networkErr) {
+        console.error('🌐 Network error fetching profile:', networkErr);
+        // Transient network issue: do NOT logout; retry with backoff
+        if (retryCount < 5) {
+          const delay = Math.min(2000 * (retryCount + 1), 8000);
+          console.log(`🔁 Network retry in ${delay}ms (attempt ${retryCount + 2}/6)`);
+          await new Promise(r => setTimeout(r, delay));
+          setProfileFetchInFlight(false);
+          return fetchUserProfile(userId, token, retryCount + 1, silent);
+        }
+        if (!silent) toast.error('Network issue loading profile. Please retry.');
+        return; // Keep session intact
+      }
 
       if (response.ok) {
         const profileText = await response.text();
-        console.log(`📥 Raw profile response:`, profileText);
-        const profile = JSON.parse(profileText);
-        console.log(`✅ Profile fetched successfully:`, {
+        console.log('📥 Raw profile response:', profileText);
+        let profile: UserProfile;
+        try {
+          profile = JSON.parse(profileText);
+        } catch (parseErr) {
+          console.error('❌ Failed to parse profile JSON:', parseErr);
+          if (!silent) toast.error('Corrupted profile data received');
+          return;
+        }
+
+        console.log('✅ Profile fetched:', {
           userId: profile.userId,
           email: profile.email,
           role: profile.role,
-          roleType: typeof profile.role,
-          enrolledCourses: profile.enrolledCourses,
+          enrolledCoursesLen: profile.enrolledCourses?.length,
+          ms: Date.now() - startedAt,
         });
-        
-        console.log('📝 Setting user profile state...');
+
         setUserProfile(profile);
-        console.log('✅ User profile state set');
-        
-        // Route to appropriate view based on role
-        console.log(`🔀 Routing to view based on role: ${profile.role}`);
-        if (profile.role === 'admin') {
-          console.log('→ Setting view to: admin');
-          setCurrentView('admin');
-        } else {
-          console.log('→ Setting view to: dashboard');
-          setCurrentView('dashboard');
+        const targetView = profile.role === 'admin' ? 'admin' : 'dashboard';
+        console.log(`🔀 Routing based on role='${profile.role}' -> view='${targetView}'`);
+        setCurrentView(targetView);
+        return;
+      }
+
+      // Non-OK responses
+      const status = response.status;
+      const bodyText = await response.text();
+      let bodyJson: any = null;
+      try { bodyJson = JSON.parse(bodyText); } catch { /* ignore */ }
+      console.warn(`⚠️ Profile fetch failed status=${status} body=`, bodyJson || bodyText);
+
+      // 404 – profile not yet created; extend retry window
+      if (status === 404) {
+        if (retryCount < 6) { // give more time for async creation
+          const delay = 1000 * (retryCount + 1);
+          console.log(`🕒 Profile missing (404). Retrying in ${delay}ms (attempt ${retryCount + 2}/7)`);
+          await new Promise(r => setTimeout(r, delay));
+          setProfileFetchInFlight(false);
+          return fetchUserProfile(userId, token, retryCount + 1, silent);
         }
-        console.log(`✅ View set to: ${profile.role === 'admin' ? 'admin' : 'dashboard'}`);
-      } else {
-        console.error(`❌ Failed to fetch profile. Status: ${response.status}`);
-        const errorText = await response.text();
-        console.error(`❌ Error response:`, errorText);
-        
-        // Handle 404 - profile might not exist yet or need creation
-        if (response.status === 404) {
-          if (retryCount < 3) {
-            console.log(`⏳ Profile not found, retrying in 2 seconds... (attempt ${retryCount + 1}/4)`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            return fetchUserProfile(userId, token, retryCount + 1, silent);
-          } else {
-            console.error('❌ Profile not found after multiple retries');
-            if (!silent) {
-              toast.error('Profile not found. Please contact support or try signing up again.');
-            }
-            // Clear session if profile doesn't exist
-            await supabase.auth.signOut();
-            setCurrentView('landing');
-          }
-        }
-        // Handle 401/403 - invalid/expired token
-        else if (response.status === 401 || response.status === 403) {
-          console.log('🔒 Authentication error - invalid or expired token');
-          // Sign out from Supabase which will trigger SIGNED_OUT event
+        console.error('❌ Profile still not found after extended retries – NOT logging out automatically');
+        if (!silent) toast.error('Profile not found yet. Please try refreshing in a moment.');
+        // Keep session; allow manual refresh instead of forced logout
+        return;
+      }
+
+      // Auth errors – only logout on clear auth failure
+      if (status === 401 || status === 403) {
+        const msg = bodyJson?.error || bodyJson?.message || bodyText;
+        const isDefiniteAuthFailure = msg?.toLowerCase()?.includes('invalid') || msg?.toLowerCase()?.includes('expired');
+        if (isDefiniteAuthFailure) {
+          console.log('🔒 Confirmed auth failure – signing out');
           await supabase.auth.signOut();
-          if (!silent) {
-            toast.error('Session expired. Please log in again.');
+          if (!silent) toast.error('Session expired. Please log in again.');
+        } else {
+          console.log('⚠️ Ambiguous 401/403 response – treating as transient, NOT logging out');
+          if (retryCount < 3) {
+            await new Promise(r => setTimeout(r, 1500));
+            setProfileFetchInFlight(false);
+            return fetchUserProfile(userId, token, retryCount + 1, silent);
           }
+          if (!silent) toast.error('Temporary auth issue. Please refresh.');
         }
-        // Other errors
-        else {
-          console.error('❌ Unexpected error fetching profile');
-          if (!silent) {
-            toast.error('Failed to load profile. Please try again.');
-          }
+        return;
+      }
+
+      // 5xx or other unexpected errors – treat as transient
+      if (status >= 500) {
+        if (retryCount < 4) {
+          const delay = 1500 * (retryCount + 1);
+          console.log(`🛠️ Server error ${status}. Retrying in ${delay}ms (attempt ${retryCount + 2}/5)`);
+          await new Promise(r => setTimeout(r, delay));
+          setProfileFetchInFlight(false);
+          return fetchUserProfile(userId, token, retryCount + 1, silent);
         }
+        if (!silent) toast.error('Server issue loading profile. Try again later.');
+        return;
       }
-    } catch (error) {
-      console.error('❌ Error fetching user profile:', error);
-      if (!silent) {
-        toast.error('Failed to load user profile');
-      }
+
+      // Fallback unexpected error
+      if (!silent) toast.error('Unexpected error loading profile');
+    } finally {
+      setProfileFetchInFlight(false);
     }
   };
 
