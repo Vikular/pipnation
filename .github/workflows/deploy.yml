@@ -68,12 +68,12 @@ jobs:
       - name: Install Dependencies
         run: npm ci
         
-      - name: Build (Pages base)
+      - name: Build (Custom domain - root base)
         env:
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          npm run build:pages
+          npm run build:local
           
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -106,7 +106,7 @@ jobs:
       - name: Smoke test published site
         run: |
           set -e
-          URL="https://vikular.github.io/pipnation"
+          URL="https://www.pipnationacademy.com"
           echo "Checking $URL"
           attempts=12
           for i in $(seq 1 $attempts); do
