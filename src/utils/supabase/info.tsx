@@ -6,13 +6,13 @@
  environment variables in your host/CI (Vercel/Netlify/Supabase/etc.).
 */
 
-// This file expects both values to be provided via Vite environment variables.
-// Do NOT commit secrets to source. Set these in your host/CI (Vercel/Netlify/GitHub Actions).
-// Example env names: VITE_SUPABASE_PROJECT_ID and VITE_SUPABASE_ANON_KEY
+// Fallback values for when env vars are not set (GitHub Pages deployment)
+const FALLBACK_PROJECT_ID = 'oexhltmmtcplmzxeymio';
+const FALLBACK_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9leGhsdG1tdGNwbG16eGV5bWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjYxMDMsImV4cCI6MjA3Nzk0MjEwM30.V5aYoVo9FRgS3D2uAYAVyqZHsz3CSOE-CTo2DHjW5t8';
 
-export const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
+export const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || FALLBACK_PROJECT_ID;
 
-export const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+export const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || FALLBACK_ANON_KEY;
 
 // Optional runtime sanity check (will log a clear error in the browser if missing)
 if (!projectId || !publicAnonKey) {
