@@ -479,7 +479,9 @@ export default function App() {
   };
 
   const handleViewChange = (view: View) => {
+    console.log(`🔀 handleViewChange called with view: ${view}`);
     setCurrentView(view);
+    console.log(`✅ Current view set to: ${view}`);
   };
 
   // Show diagnostics if there's a '?diagnostics' query parameter
@@ -578,7 +580,7 @@ export default function App() {
       )}
 
       {currentView === 'beginners' && userProfile && (() => {
-        const isEnrolled = userProfile.enrolledCourses.includes('beginners');
+        const isEnrolled = userProfile.enrolledCourses?.includes('beginners') || false;
         const hasAccess = isEnrolled && userProfile.role !== 'lead';
         
         console.log('🔍 Beginners view render:', {
@@ -619,7 +621,7 @@ export default function App() {
       })()}
 
       {currentView === 'strategy' && userProfile && (() => {
-        const isEnrolled = userProfile.enrolledCourses.includes('strategy');
+        const isEnrolled = userProfile.enrolledCourses?.includes('strategy') || false;
         const hasAccess = isEnrolled && userProfile.role !== 'lead';
         
         console.log('🔍 Strategy view render:', {

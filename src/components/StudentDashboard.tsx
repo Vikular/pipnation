@@ -227,7 +227,11 @@ export function StudentDashboard({ user, onLogout, onLessonClick, onSubmitFTMO, 
                   </div>
                   <div className="flex-shrink-0">
                     <Button
-                      onClick={() => onViewChange('courses')}
+                      onClick={() => {
+                        console.log('🔘 Enroll Now button clicked!');
+                        console.log('📞 Calling onViewChange with: courses');
+                        onViewChange('courses');
+                      }}
                       size="lg"
                       className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg"
                     >
