@@ -146,7 +146,12 @@ async function getProfile(urlParts: string[], req: Request) {
   }
   
   console.log(`✅ Profile found for: ${userId}`);
-  return json(row.value);
+  // row.value might be a string or object depending on how it was stored
+  const profile = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+  return new Response(JSON.stringify(profile), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function bootstrapAdmin(req: Request) {
