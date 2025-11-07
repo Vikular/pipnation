@@ -82,7 +82,7 @@ export default function App() {
           setAccessToken(session.access_token);
           localStorage.setItem('accessToken', session.access_token);
           localStorage.setItem('userId', session.user.id);
-          await fetchUserProfile(session.user.id, session.access_token);
+          await fetchUserProfile(session.user.id, session.access_token, 0, true); // silent = true
         } else {
           console.log('ℹ️ No active session found');
           localStorage.removeItem('accessToken');
@@ -107,7 +107,7 @@ export default function App() {
         setAccessToken(session.access_token);
         localStorage.setItem('accessToken', session.access_token);
         localStorage.setItem('userId', session.user.id);
-        await fetchUserProfile(session.user.id, session.access_token);
+        await fetchUserProfile(session.user.id, session.access_token, 0, true); // silent during auto-restore
       } else if (event === 'SIGNED_OUT') {
         setAccessToken('');
         setUserProfile(null);
@@ -129,7 +129,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchUserProfile = async (userId: string, token: string, retryCount = 0) => {
+  const fetchUserProfile = async (userId: string, token: string, retryCount = 0, silent = false) => {
     try {
       console.log(`🔄 Fetching user profile for userId: ${userId} (attempt ${retryCount + 1})`);
       const response = await fetch(`${apiUrl}/user/${userId}`, {
@@ -164,11 +164,14 @@ export default function App() {
           if (retryCount < 3) {
             console.log(`⏳ Profile not found, retrying in 2 seconds... (attempt ${retryCount + 1}/4)`);
             await new Promise(resolve => setTimeout(resolve, 2000));
-            return fetchUserProfile(userId, token, retryCount + 1);
+            return fetchUserProfile(userId, token, retryCount + 1, silent);
           } else {
             console.error('❌ Profile not found after multiple retries');
-            toast.error('Profile not found. Please contact support or try signing up again.');
-            // Don't logout - just show error
+            if (!silent) {
+              toast.error('Profile not found. Please contact support or try signing up again.');
+            }
+            // Clear session if profile doesn't exist
+            await supabase.auth.signOut();
             setCurrentView('landing');
           }
         }
@@ -177,17 +180,23 @@ export default function App() {
           console.log('🔒 Authentication error - invalid or expired token');
           // Sign out from Supabase which will trigger SIGNED_OUT event
           await supabase.auth.signOut();
-          toast.error('Session expired. Please log in again.');
+          if (!silent) {
+            toast.error('Session expired. Please log in again.');
+          }
         }
         // Other errors
         else {
           console.error('❌ Unexpected error fetching profile');
-          toast.error('Failed to load profile. Please try again.');
+          if (!silent) {
+            toast.error('Failed to load profile. Please try again.');
+          }
         }
       }
     } catch (error) {
       console.error('❌ Error fetching user profile:', error);
-      toast.error('Failed to load user profile');
+      if (!silent) {
+        toast.error('Failed to load user profile');
+      }
     }
   };
 
