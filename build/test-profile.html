@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Test - PipNation Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .section h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .data-display {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #ffc107;
+        }
+        .highlight h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .clear-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Profile Debug Tool</h1>
+        
+        <div class="highlight">
+            <h3>⚠️ Important: Clear Your Browser Data First!</h3>
+            <p>Press <kbd>Ctrl+Shift+Delete</kbd> (or <kbd>Cmd+Shift+Delete</kbd> on Mac) and clear:</p>
+            <ul>
+                <li>Cookies and site data</li>
+                <li>Cached images and files</li>
+            </ul>
+            <p>Or click the button below:</p>
+            <button class="clear-btn" onclick="clearLocalData()">🗑️ Clear LocalStorage & Refresh</button>
+        </div>
+
+        <div class="section">
+            <h2>1. Login</h2>
+            <div class="input-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="newadmin@pipnationacademy.com" placeholder="Enter email">
+            </div>
+            <div class="input-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="AdminPass123!" placeholder="Enter password">
+            </div>
+            <button onclick="testLogin()">🔐 Login & Fetch Profile</button>
+            <div id="loginStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Current LocalStorage Data</h2>
+            <div class="data-display" id="localStorageDisplay">Click "Show LocalStorage" to view...</div>
+            <button onclick="showLocalStorage()">📦 Show LocalStorage</button>
+        </div>
+
+        <div class="section">
+            <h2>3. Profile API Response</h2>
+            <div class="data-display" id="profileDisplay">Login first to fetch profile...</div>
+        </div>
+
+        <div class="section">
+            <h2>4. Role Check</h2>
+            <div id="roleCheck" class="status info">
+                Login to check role...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PROJECT_ID = 'oexhltmmtcplmzxeymio';
+        const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9leGhsdG1tdGNwbG16eGV5bWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjYxMDMsImV4cCI6MjA3Nzk0MjEwM30.V5aYoVo9FRgS3D2uAYAVyqZHsz3CSOE-CTo2DHjW5t8';
+        const AUTH_URL = `https://${PROJECT_ID}.supabase.co/auth/v1/token?grant_type=password`;
+        const API_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/api-server`;
+
+        function clearLocalData() {
+            localStorage.clear();
+            sessionStorage.clear();
+            alert('✅ LocalStorage and SessionStorage cleared!\n\nThe page will now refresh.');
+            location.reload();
+        }
+
+        function showLocalStorage() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    data[key] = JSON.parse(localStorage.getItem(key));
+                } catch {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            document.getElementById('localStorageDisplay').textContent = 
+                JSON.stringify(data, null, 2) || '(Empty)';
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const statusEl = document.getElementById('loginStatus');
+            const profileEl = document.getElementById('profileDisplay');
+            const roleEl = document.getElementById('roleCheck');
+
+            statusEl.innerHTML = '<div class="status info">🔄 Logging in...</div>';
+
+            try {
+                // Step 1: Login
+                const loginResponse = await fetch(AUTH_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': ANON_KEY
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error(`Login failed: ${loginResponse.status}`);
+                }
+
+                const loginData = await loginResponse.json();
+                const accessToken = loginData.access_token;
+                const userId = loginData.user.id;
+
+                statusEl.innerHTML = `
+                    <div class="status success">
+                        ✅ Login successful!<br>
+                        User ID: ${userId}<br>
+                        Token: ${accessToken.substring(0, 50)}...
+                    </div>
+                `;
+
+                // Step 2: Fetch Profile
+                profileEl.textContent = '🔄 Fetching profile...';
+                
+                const profileResponse = await fetch(`${API_URL}/user/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!profileResponse.ok) {
+                    throw new Error(`Profile fetch failed: ${profileResponse.status}`);
+                }
+
+                const profileText = await profileResponse.text();
+                console.log('📥 Raw profile response:', profileText);
+                
+                const profile = JSON.parse(profileText);
+                console.log('✅ Parsed profile:', profile);
+
+                profileEl.textContent = JSON.stringify(profile, null, 2);
+
+                // Step 3: Check Role
+                if (profile.role === 'admin') {
+                    roleEl.innerHTML = `
+                        <div class="status success">
+                            ✅ ADMIN ROLE DETECTED!<br>
+                            Role: <strong>${profile.role}</strong><br>
+                            This account SHOULD see the admin dashboard.
+                        </div>
+                    `;
+                } else if (profile.role) {
+                    roleEl.innerHTML = `
+                        <div class="status error">
+                            ⚠️ Role is set but NOT admin<br>
+                            Role: <strong>${profile.role}</strong><br>
+                            This account will see student dashboard.
+                        </div>
+                    `;
+                } else {
+                    roleEl.innerHTML = `
+                        <div class="status error">
+                            ❌ ROLE IS UNDEFINED!<br>
+                            Role field: <strong>${profile.role}</strong><br>
+                            Type: <strong>${typeof profile.role}</strong><br>
+                            <br>
+                            This is the BUG - the profile object doesn't have a role field!
+                        </div>
+                    `;
+                }
+
+                // Show localStorage
+                showLocalStorage();
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                statusEl.innerHTML = `
+                    <div class="status error">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+                profileEl.textContent = error.message;
+            }
+        }
+
+        // Show localStorage on load
+        window.addEventListener('load', showLocalStorage);
+    </script>
+</body>
+</html>
