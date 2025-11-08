@@ -223,26 +223,30 @@ export default function App() {
         console.log(`⚠️ Auth error (${status}): "${msg}"`);
         console.log(`   - isDefiniteAuthFailure: ${isDefiniteAuthFailure}`);
         
-        if (isDefiniteAuthFailure) {
-          // Even with "invalid token", retry once in case of transient issue
-          if (retryCount === 0) {
-            console.log('🔄 Auth error detected, but retrying once before logout...');
-            await new Promise(r => setTimeout(r, 2000));
-            setProfileFetchInFlight(false);
-            return fetchUserProfile(userId, token, retryCount + 1, silent);
-          }
-          
-          console.log('🔒 Confirmed persistent auth failure – signing out');
+        if (isDefiniteAuthFailure && retryCount < 2) {
+          // ALWAYS retry at least twice, even for "definite" failures
+          const delay = retryCount === 0 ? 2000 : 3000;
+          console.log(`🔄 Auth error detected (attempt ${retryCount + 1}/3), retrying in ${delay}ms...`);
+          await new Promise(r => setTimeout(r, delay));
+          setProfileFetchInFlight(false);
+          return fetchUserProfile(userId, token, retryCount + 1, silent);
+        }
+        
+        if (isDefiniteAuthFailure && retryCount >= 2) {
+          // Only logout after 3 failed attempts
+          console.log('🔒 Auth failure persisted after 3 attempts – signing out');
           await supabase.auth.signOut();
           if (!silent) toast.error('Session expired. Please log in again.');
+        } else if (!isDefiniteAuthFailure && retryCount < 4) {
+          // Ambiguous errors: retry even more times
+          console.log(`⚠️ Ambiguous 401/403 (attempt ${retryCount + 1}/5) – retrying, NOT logging out`);
+          await new Promise(r => setTimeout(r, 1500));
+          setProfileFetchInFlight(false);
+          return fetchUserProfile(userId, token, retryCount + 1, silent);
         } else {
-          console.log('⚠️ Ambiguous 401/403 response – treating as transient, NOT logging out');
-          if (retryCount < 3) {
-            await new Promise(r => setTimeout(r, 1500));
-            setProfileFetchInFlight(false);
-            return fetchUserProfile(userId, token, retryCount + 1, silent);
-          }
-          if (!silent) toast.error('Temporary auth issue. Please refresh.');
+          // After max retries, just show error but DON'T logout
+          console.log('⚠️ Max retries reached, keeping session but showing error');
+          if (!silent) toast.error('Profile load issue. Try refreshing page.');
         }
         return;
       }
