@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout Debug Tool - PipNation Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .status-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .status-value {
+            font-family: 'Courier New', monospace;
+            color: #666;
+            max-width: 60%;
+            word-break: break-all;
+        }
+        .status-ok {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .status-error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .log-container {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-time {
+            color: #858585;
+            margin-right: 10px;
+        }
+        .log-error {
+            color: #f48771;
+        }
+        .log-success {
+            color: #89d185;
+        }
+        .log-info {
+            color: #4fc1ff;
+        }
+        .log-warning {
+            color: #dcdcaa;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Logout Debug Tool</h1>
+            <p>Monitor your session status and identify logout causes</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>📊 Current Session Status</h2>
+                <div id="sessionStatus">
+                    <div class="status-item">
+                        <span class="status-label">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔐 Authentication State</h2>
+                <div id="authStatus">
+                    <div class="status-item">
+                        <span class="status-label">Checking...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📝 Live Event Log</h2>
+                <p style="margin-bottom: 10px; color: #666;">This log captures all authentication events and logout triggers in real-time.</p>
+                <div class="log-container" id="logContainer"></div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="clearLogs()">Clear Logs</button>
+                    <button class="btn-secondary" onclick="exportLogs()">Export Logs</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🛠️ Actions</h2>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="refreshStatus()">Refresh Status</button>
+                    <button class="btn-secondary" onclick="testProfile()">Test Profile Fetch</button>
+                    <button class="btn-danger" onclick="clearSession()">Clear Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8';
+        
+        const SUPABASE_URL = 'https://oexhltmmtcplmzxeymio.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9leGhsdG1tdGNwbG16eGV5bWlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjYxMDMsImV4cCI6MjA3Nzk0MjEwM30.V5aYoVo9FRgS3D2uAYAVyqZHsz3CSOE-CTo2DHjW5t8';
+        const API_URL = 'https://oexhltmmtcplmzxeymio.supabase.co/functions/v1/api-server';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let eventLog = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push({ timestamp, message, type });
+            
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            let className = 'log-info';
+            if (type === 'error') className = 'log-error';
+            if (type === 'success') className = 'log-success';
+            if (type === 'warning') className = 'log-warning';
+            
+            logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span><span class="${className}">${message}</span>`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        window.clearLogs = function() {
+            eventLog = [];
+            document.getElementById('logContainer').innerHTML = '';
+            log('Logs cleared', 'info');
+        };
+        
+        window.exportLogs = function() {
+            const logText = eventLog.map(e => `[${e.timestamp}] ${e.message}`).join('\n');
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logout-debug-${Date.now()}.txt`;
+            a.click();
+            log('Logs exported', 'success');
+        };
+        
+        window.clearSession = function() {
+            if (!confirm('This will clear your session. Continue?')) return;
+            
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userId');
+            supabase.auth.signOut();
+            log('Session cleared manually', 'warning');
+            setTimeout(refreshStatus, 500);
+        };
+        
+        async function updateSessionStatus() {
+            const statusDiv = document.getElementById('sessionStatus');
+            const accessToken = localStorage.getItem('accessToken');
+            const userId = localStorage.getItem('userId');
+            
+            let html = '';
+            
+            if (accessToken) {
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">Access Token:</span>
+                        <span class="status-value status-ok">✓ Present (${accessToken.substring(0, 30)}...)</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">Access Token:</span>
+                        <span class="status-value status-error">✗ Missing</span>
+                    </div>
+                `;
+            }
+            
+            if (userId) {
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">User ID:</span>
+                        <span class="status-value status-ok">✓ ${userId}</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">User ID:</span>
+                        <span class="status-value status-error">✗ Missing</span>
+                    </div>
+                `;
+            }
+            
+            statusDiv.innerHTML = html;
+        }
+        
+        async function updateAuthStatus() {
+            const authDiv = document.getElementById('authStatus');
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                let html = '';
+                
+                if (error) {
+                    html = `
+                        <div class="status-item">
+                            <span class="status-label">Supabase Session:</span>
+                            <span class="status-value status-error">Error: ${error.message}</span>
+                        </div>
+                    `;
+                    log(`Session error: ${error.message}`, 'error');
+                } else if (session) {
+                    const expiresAt = new Date(session.expires_at * 1000);
+                    const now = new Date();
+                    const minutesUntilExpiry = Math.floor((expiresAt - now) / 60000);
+                    
+                    html = `
+                        <div class="status-item">
+                            <span class="status-label">Supabase Session:</span>
+                            <span class="status-value status-ok">✓ Active</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">User Email:</span>
+                            <span class="status-value">${session.user.email}</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Token Expires:</span>
+                            <span class="status-value ${minutesUntilExpiry < 5 ? 'status-error' : 'status-ok'}">
+                                ${minutesUntilExpiry} minutes (${expiresAt.toLocaleTimeString()})
+                            </span>
+                        </div>
+                    `;
+                    
+                    if (minutesUntilExpiry < 5) {
+                        log(`⚠️ Token expiring soon (${minutesUntilExpiry} min)`, 'warning');
+                    }
+                } else {
+                    html = `
+                        <div class="status-item">
+                            <span class="status-label">Supabase Session:</span>
+                            <span class="status-value status-error">✗ No active session</span>
+                        </div>
+                    `;
+                    log('No active Supabase session found', 'warning');
+                }
+                
+                authDiv.innerHTML = html;
+            } catch (err) {
+                authDiv.innerHTML = `
+                    <div class="status-item">
+                        <span class="status-label">Error:</span>
+                        <span class="status-value status-error">${err.message}</span>
+                    </div>
+                `;
+                log(`Exception checking auth: ${err.message}`, 'error');
+            }
+        }
+        
+        window.refreshStatus = async function() {
+            log('Refreshing status...', 'info');
+            await updateSessionStatus();
+            await updateAuthStatus();
+            log('Status refreshed', 'success');
+        };
+        
+        window.testProfile = async function() {
+            const userId = localStorage.getItem('userId');
+            const accessToken = localStorage.getItem('accessToken');
+            
+            if (!userId || !accessToken) {
+                log('Cannot test profile - no session found', 'error');
+                return;
+            }
+            
+            log(`Testing profile fetch for user: ${userId}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/user/${userId}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                
+                log(`Profile API response: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const profile = await response.json();
+                    log(`✓ Profile loaded: ${profile.email} (role: ${profile.role})`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`✗ Profile fetch failed: ${errorText}`, 'error');
+                }
+            } catch (err) {
+                log(`✗ Profile fetch exception: ${err.message}`, 'error');
+            }
+        };
+        
+        // Monitor auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            log(`🔔 Auth event: ${event}`, event === 'SIGNED_OUT' ? 'error' : 'success');
+            
+            if (event === 'SIGNED_OUT') {
+                log('⚠️ LOGOUT DETECTED - Check above logs for cause', 'error');
+            } else if (event === 'TOKEN_REFRESHED') {
+                log('✓ Token refreshed successfully', 'success');
+            } else if (event === 'SIGNED_IN') {
+                log(`✓ Signed in as ${session?.user?.email}`, 'success');
+            }
+            
+            setTimeout(refreshStatus, 100);
+        });
+        
+        // Monitor localStorage changes
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'accessToken' || e.key === 'userId') {
+                log(`LocalStorage changed: ${e.key} = ${e.newValue ? 'set' : 'removed'}`, 'warning');
+                setTimeout(refreshStatus, 100);
+            }
+        });
+        
+        // Initial load
+        log('Debug tool initialized', 'success');
+        refreshStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(refreshStatus, 30000);
+    </script>
+</body>
+</html>

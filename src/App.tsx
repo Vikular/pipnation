@@ -209,12 +209,30 @@ export default function App() {
         return;
       }
 
-      // Auth errors – only logout on clear auth failure
+      // Auth errors – be MORE conservative about logging out
       if (status === 401 || status === 403) {
         const msg = bodyJson?.error || bodyJson?.message || bodyText;
-        const isDefiniteAuthFailure = msg?.toLowerCase()?.includes('invalid') || msg?.toLowerCase()?.includes('expired');
+        const msgLower = msg?.toLowerCase() || '';
+        
+        // Only logout if BOTH "invalid" AND "token" appear, or "expired" appears
+        // This prevents logout on ambiguous errors like "invalid request"
+        const isDefiniteAuthFailure = 
+          (msgLower.includes('invalid') && msgLower.includes('token')) || 
+          msgLower.includes('expired');
+        
+        console.log(`⚠️ Auth error (${status}): "${msg}"`);
+        console.log(`   - isDefiniteAuthFailure: ${isDefiniteAuthFailure}`);
+        
         if (isDefiniteAuthFailure) {
-          console.log('🔒 Confirmed auth failure – signing out');
+          // Even with "invalid token", retry once in case of transient issue
+          if (retryCount === 0) {
+            console.log('🔄 Auth error detected, but retrying once before logout...');
+            await new Promise(r => setTimeout(r, 2000));
+            setProfileFetchInFlight(false);
+            return fetchUserProfile(userId, token, retryCount + 1, silent);
+          }
+          
+          console.log('🔒 Confirmed persistent auth failure – signing out');
           await supabase.auth.signOut();
           if (!silent) toast.error('Session expired. Please log in again.');
         } else {
