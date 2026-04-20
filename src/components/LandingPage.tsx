@@ -767,10 +767,7 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
             viewport={{ once: true }}
             className="text-center mt-12"
           >
-            <p className="text-gray-600 mb-4">
-              <Shield className="w-5 h-5 inline mr-2" />
-              30-day money-back guarantee on all paid plans
-            </p>
+          
           </motion.div>
         </div>
       </section>
